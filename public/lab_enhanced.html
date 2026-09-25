@@ -1,0 +1,2197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>IoT Virtual Lab — Enhanced</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #f0f4f8;
+  --surface: #ffffff;
+  --surface2: #f7f9fc;
+  --surface3: #eef2f7;
+  --border: #dde3ed;
+  --border2: #c5cfe0;
+  --accent: #2563eb;
+  --accent-light: #dbeafe;
+  --accent2: #1d4ed8;
+  --green: #16a34a;
+  --green-light: #dcfce7;
+  --amber: #d97706;
+  --amber-light: #fef3c7;
+  --red: #dc2626;
+  --red-light: #fee2e2;
+  --purple: #7c3aed;
+  --purple-light: #ede9fe;
+  --teal: #0891b2;
+  --teal-light: #cffafe;
+  --orange: #ea580c;
+  --text: #1e293b;
+  --text2: #64748b;
+  --text3: #94a3b8;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
+  --shadow: 0 4px 12px rgba(0,0,0,.08), 0 2px 6px rgba(0,0,0,.06);
+  --shadow-lg: 0 10px 30px rgba(0,0,0,.1), 0 4px 12px rgba(0,0,0,.06);
+  --wire-red: #ef4444;
+  --wire-black: #475569;
+  --wire-yellow: #eab308;
+  --wire-green: #22c55e;
+  --wire-blue: #3b82f6;
+  --wire-orange: #f97316;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font: 'Plus Jakarta Sans', sans-serif;
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg);color:var(--text);height:100vh;overflow:hidden;display:flex;flex-direction:column;user-select:none;}
+
+/* ── TOP BAR ── */
+#topbar{height:52px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:10px;z-index:100;flex-shrink:0;box-shadow:var(--shadow-sm);}
+.logo{display:flex;align-items:center;gap:9px;margin-right:8px;}
+.logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--accent),var(--purple));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;box-shadow:0 2px 8px rgba(37,99,235,.3);}
+.logo-text{font-size:15px;font-weight:800;color:var(--text);}
+.logo-sub{font-size:9px;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;font-weight:600;}
+.divider{width:1px;height:24px;background:var(--border);margin:0 4px;}
+.tab-btn{padding:6px 14px;border-radius:var(--radius-sm);font-size:12px;font-weight:600;letter-spacing:.02em;border:1px solid transparent;background:transparent;color:var(--text2);cursor:pointer;font-family:var(--font);transition:all .15s;}
+.tab-btn:hover{background:var(--surface3);color:var(--text);}
+.tab-btn.active{border-color:var(--accent);background:var(--accent-light);color:var(--accent);}
+.spacer{flex:1;}
+.sim-badge{display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:20px;background:var(--surface3);border:1px solid var(--border);}
+.sim-dot{width:7px;height:7px;border-radius:50%;background:var(--text3);transition:all .3s;}
+.sim-dot.live{background:var(--green);box-shadow:0 0 0 3px var(--green-light);}
+.sim-label{font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--text2);}
+.sim-label.live{color:var(--green);}
+.ctrl-btn{padding:6px 16px;border-radius:var(--radius-sm);font-size:12px;font-weight:700;border:1px solid;cursor:pointer;font-family:var(--font);letter-spacing:.02em;transition:all .15s;}
+.btn-run{border-color:var(--green);color:var(--green);background:var(--green-light);}
+.btn-run:hover{background:#bbf7d0;}
+.btn-stop{border-color:var(--red);color:var(--red);background:var(--red-light);}
+.btn-upload{border-color:var(--amber);color:var(--amber);background:var(--amber-light);}
+.btn-clear{border-color:var(--border2);color:var(--text2);background:var(--surface3);}
+.btn-clear:hover{background:var(--border);color:var(--text);}
+
+/* ── MAIN LAYOUT ── */
+#main{flex:1;display:flex;overflow:hidden;position:relative;}
+
+/* ── SIDEBAR TOGGLE BUTTONS ── */
+.sidebar-toggle{position:absolute;top:50%;transform:translateY(-50%);z-index:30;width:28px;height:56px;display:flex;align-items:center;justify-content:center;background:var(--surface);border:1px solid var(--border);cursor:pointer;border-radius:0 8px 8px 0;transition:all .25s;font-size:14px;color:var(--text2);}
+.sidebar-toggle:hover{background:var(--surface2);color:var(--accent);}
+#toggle-left{left:0;}
+#toggle-left.collapsed{left:0;}
+#toggle-right{right:0;}
+#toggle-right.collapsed{right:0;}
+
+/* ── LEFT: Component Panel ── */
+#comp-panel{width:190px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;transition:margin-left .35s cubic-bezier(.4,.0,.2,1),width .35s cubic-bezier(.4,.0,.2,1);}
+#comp-panel.collapsed{margin-left:-190px;width:0;border-right:none;}
+.panel-hdr{padding:12px 14px 10px;border-bottom:1px solid var(--border);background:var(--surface2);}
+.panel-hdr-txt{font-size:10px;color:var(--text2);letter-spacing:.12em;text-transform:uppercase;font-weight:700;}
+.panel-search{margin:8px 10px 4px;display:flex;align-items:center;gap:6px;background:var(--surface3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:5px 9px;}
+.panel-search input{border:none;background:transparent;font-size:11px;color:var(--text);font-family:var(--font);outline:none;width:100%;}
+.panel-search span{color:var(--text3);font-size:12px;}
+.comp-list{flex:1;overflow-y:auto;padding:4px 8px 8px;}
+.comp-cat{font-size:9px;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;font-weight:700;padding:10px 4px 4px;display:flex;align-items:center;gap:6px;}
+.comp-cat::after{content:'';flex:1;height:1px;background:var(--border);}
+.comp-item{display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:8px;cursor:grab;border:1px solid transparent;transition:all .15s;margin-bottom:2px;}
+.comp-item:hover{background:var(--accent-light);border-color:#bfdbfe;}
+.comp-item:active{cursor:grabbing;}
+.comp-thumb{width:38px;height:30px;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;font-family:var(--font-mono);}
+.comp-name{font-size:11px;color:var(--text);font-weight:600;line-height:1.3;}
+.comp-type{font-size:9px;color:var(--text3);letter-spacing:.04em;text-transform:uppercase;font-weight:500;}
+
+/* ── CENTER: Canvas ── */
+#canvas-wrap{flex:1;position:relative;overflow:hidden;background:var(--bg);}
+#canvas-bg{position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(37,99,235,.06) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(37,99,235,.06) 1px,transparent 1px),
+    linear-gradient(rgba(37,99,235,.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(37,99,235,.03) 1px,transparent 1px);
+  background-size:40px 40px,40px 40px,8px 8px,8px 8px;
+  pointer-events:none;}
+#wire-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;}
+#nodes-layer{position:absolute;inset:0;z-index:2;}
+#canvas-hint{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;z-index:0;}
+.hint-icon{font-size:48px;opacity:.15;margin-bottom:16px;}
+.hint-txt{font-size:13px;color:var(--text3);text-align:center;line-height:2;font-weight:500;}
+.hint-pill{display:inline-flex;align-items:center;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:11px;color:var(--text2);font-weight:600;}
+
+/* ── RIGHT: Guide + Code ── */
+#right-panel{width:310px;background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;transition:margin-right .35s cubic-bezier(.4,.0,.2,1),width .35s cubic-bezier(.4,.0,.2,1);}
+#right-panel.collapsed{margin-right:-310px;width:0;border-left:none;}
+.rpanel-tabs{display:flex;border-bottom:1px solid var(--border);background:var(--surface2);padding:4px 6px 0;}
+.rpanel-tab{flex:1;padding:8px 0 10px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border:none;background:transparent;cursor:pointer;font-family:var(--font);border-bottom:2px solid transparent;color:var(--text2);transition:all .15s;border-radius:6px 6px 0 0;margin:0 2px;}
+.rpanel-tab.active{color:var(--accent);border-bottom-color:var(--accent);background:var(--surface);}
+.rpanel-body{flex:1;overflow-y:auto;display:flex;flex-direction:column;}
+
+/* ── GUIDE TAB ── */
+#guide-body{padding:14px;flex:1;}
+.step-card{background:linear-gradient(135deg,var(--accent-light),#eff6ff);border:1px solid #bfdbfe;border-radius:12px;padding:14px 16px;margin-bottom:12px;}
+.step-badge{display:inline-flex;align-items:center;gap:6px;background:var(--accent);color:#fff;border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;margin-bottom:10px;}
+.step-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px;}
+.step-body{font-size:11px;color:var(--text2);line-height:1.75;}
+.wire-legend{display:flex;align-items:center;gap:8px;margin:4px 0;}
+.wire-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;border:1px solid rgba(0,0,0,.1);}
+.wire-legend span{font-size:10px;color:var(--text2);font-weight:500;}
+.pin-tag{display:inline-block;padding:1px 8px;background:#fff;border:1px solid var(--border2);border-radius:5px;font-size:9px;color:var(--accent);font-family:var(--font-mono);font-weight:700;box-shadow:var(--shadow-sm);}
+.progress-wrap{margin-bottom:14px;}
+.progress-label{display:flex;justify-content:space-between;margin-bottom:5px;}
+.progress-label span{font-size:10px;color:var(--text2);font-weight:600;}
+.progress-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--purple));border-radius:2px;transition:width .5s ease;}
+.step-nav{display:flex;gap:8px;margin-top:12px;}
+.snav-btn{flex:1;padding:8px 0;border-radius:8px;font-size:11px;font-weight:700;border:1px solid;cursor:pointer;font-family:var(--font);letter-spacing:.02em;transition:all .15s;}
+.snav-prev{border-color:var(--border2);color:var(--text2);background:var(--surface3);}
+.snav-prev:hover:not(:disabled){border-color:var(--border2);background:var(--border);color:var(--text);}
+.snav-next{border-color:var(--accent);color:#fff;background:var(--accent);}
+.snav-next:hover:not(:disabled){background:var(--accent2);}
+.snav-btn:disabled{opacity:.35;cursor:not-allowed;}
+.step-list-item{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:8px;cursor:pointer;transition:all .15s;margin-bottom:2px;}
+.step-list-item:hover{background:var(--surface3);}
+.step-list-item.active-step{background:var(--accent-light);}
+.step-num-circle{width:20px;height:20px;border-radius:50%;flex-shrink:0;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--text2);transition:all .15s;}
+.step-num-circle.done{background:var(--green);border-color:var(--green);color:#fff;}
+.step-num-circle.current{background:var(--accent);border-color:var(--accent);color:#fff;}
+.step-list-label{font-size:11px;color:var(--text2);font-weight:500;}
+.step-list-label.current{color:var(--accent);font-weight:700;}
+.step-list-label.done{color:var(--green);font-weight:600;}
+
+/* ── CODE TAB ── */
+#code-body{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.code-toolbar{display:flex;align-items:center;gap:6px;padding:8px 12px;border-bottom:1px solid var(--border);background:var(--surface2);}
+.code-label{font-size:10px;color:var(--text2);letter-spacing:.08em;text-transform:uppercase;font-weight:700;flex:1;}
+.code-btn{padding:5px 12px;border-radius:var(--radius-sm);font-size:10px;font-weight:700;border:1px solid;cursor:pointer;font-family:var(--font);}
+.code-btn-run{border-color:var(--green);color:var(--green);background:var(--green-light);}
+.code-btn-copy{border-color:var(--border2);color:var(--text2);background:var(--surface3);}
+#code-editor{flex:1;overflow-y:auto;padding:14px;font-family:var(--font-mono);font-size:11px;line-height:1.8;color:var(--text);background:#1e293b;border:none;outline:none;resize:none;white-space:pre;tab-size:2;color:#e2e8f0;}
+
+/* ── DEBUG CONSOLE ── */
+#debug-console{height:140px;border-top:1px solid var(--border);background:#0f172a;display:flex;flex-direction:column;flex-shrink:0;}
+.console-hdr{display:flex;align-items:center;gap:8px;padding:6px 12px;border-bottom:1px solid rgba(255,255,255,.06);}
+.console-title{font-size:10px;color:#94a3b8;letter-spacing:.1em;text-transform:uppercase;font-weight:600;flex:1;}
+.console-clear{font-size:10px;color:#475569;background:none;border:none;cursor:pointer;font-family:var(--font);}
+.console-clear:hover{color:#94a3b8;}
+#console-out{flex:1;overflow-y:auto;padding:6px 12px;font-family:var(--font-mono);font-size:10px;line-height:1.7;}
+.log-info{color:#60a5fa;}
+.log-ok{color:#34d399;}
+.log-warn{color:#fbbf24;}
+.log-err{color:#f87171;}
+.log-data{color:#94a3b8;}
+.log-time{color:#475569;margin-right:6px;}
+
+/* ── AI ASSISTANT TAB ── */
+#ai-body{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.ai-msgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px;}
+.ai-msg{}
+.ai-from{font-size:9px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;margin-bottom:4px;}
+.ai-from.bot{color:var(--accent);}
+.ai-from.user{color:var(--text2);text-align:right;}
+.ai-bubble{padding:10px 13px;border-radius:12px;font-size:11px;line-height:1.7;}
+.ai-bubble.user{background:var(--accent);color:#fff;border-radius:12px 12px 3px 12px;}
+.ai-bubble.bot{background:var(--surface3);border:1px solid var(--border);color:var(--text);}
+.ai-input-row{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--border);}
+.ai-input{flex:1;background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--text);font-family:var(--font);outline:none;transition:border .15s;}
+.ai-input:focus{border-color:var(--accent);background:#fff;}
+.ai-send{padding:8px 14px;border-radius:8px;border:none;background:var(--accent);color:#fff;font-weight:700;font-size:14px;cursor:pointer;}
+.ai-send:hover{background:var(--accent2);}
+.ai-quick{display:flex;flex-wrap:wrap;gap:4px;padding:0 12px 8px;}
+.aq-btn{font-size:10px;padding:4px 10px;border-radius:20px;border:1px solid var(--border);background:var(--surface3);color:var(--text2);cursor:pointer;font-family:var(--font);transition:all .15s;font-weight:500;}
+.aq-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light);}
+.ai-thinking{display:flex;gap:4px;align-items:center;padding:4px 0;}
+.ai-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:ai-bounce 1s ease-in-out infinite;}
+.ai-dot:nth-child(2){animation-delay:.15s;}
+.ai-dot:nth-child(3){animation-delay:.3s;}
+
+/* ── MODULES TAB ── */
+#modules-view{overflow-y:auto;padding:20px 28px;}
+.modules-header{margin-bottom:20px;}
+.modules-title{font-size:22px;font-weight:800;color:var(--text);margin-bottom:6px;}
+.modules-sub{font-size:13px;color:var(--text2);}
+.modules-filters{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+.filter-btn{padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--text2);font-size:11px;font-weight:600;cursor:pointer;font-family:var(--font);transition:all .15s;}
+.filter-btn.active,.filter-btn:hover{background:var(--accent);border-color:var(--accent);color:#fff;}
+#mod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;}
+.mod-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;cursor:pointer;transition:all .2s;box-shadow:var(--shadow-sm);}
+.mod-card:hover,.mod-card.active{border-color:var(--accent);box-shadow:var(--shadow),0 0 0 2px var(--accent-light);}
+.mod-card.active .mod-title{color:var(--accent);}
+.mod-icon{font-size:28px;margin-bottom:10px;}
+.mod-title{font-size:14px;font-weight:800;color:var(--text);margin-bottom:5px;}
+.mod-desc{font-size:11px;color:var(--text2);line-height:1.65;margin-bottom:12px;}
+.mod-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+.mod-tag{font-size:9px;padding:3px 9px;border-radius:20px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;}
+.tag-beg{background:var(--green-light);color:var(--green);border:1px solid #bbf7d0;}
+.tag-int{background:var(--amber-light);color:var(--amber);border:1px solid #fde68a;}
+.tag-adv{background:var(--red-light);color:var(--red);border:1px solid #fecaca;}
+.mod-btn{width:100%;padding:9px;border-radius:8px;font-size:11px;font-weight:700;letter-spacing:.04em;border:1px solid var(--accent);color:var(--accent);background:var(--accent-light);cursor:pointer;font-family:var(--font);transition:all .15s;}
+.mod-btn:hover{background:var(--accent);color:#fff;}
+.mod-stats{display:flex;gap:12px;margin-bottom:10px;}
+.mod-stat{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text3);font-weight:600;}
+
+/* ── REALISTIC COMPONENTS (light-themed) ── */
+.iot-node{position:absolute;cursor:default;z-index:3;}
+.iot-node.dragging{z-index:20;filter:drop-shadow(0 8px 24px rgba(37,99,235,.25));}
+.iot-node.highlighted .node-body{box-shadow:0 0 0 2px var(--accent), 0 0 16px rgba(37,99,235,.25)!important;}
+.node-body{border-radius:8px;position:relative;user-select:none;box-shadow:var(--shadow);}
+
+.arduino-board{width:165px;height:230px;background:linear-gradient(135deg,#1a4a1a 0%,#1f5c1f 50%,#1a4a1a 100%);border:2px solid #0a2a0a;border-radius:8px;position:relative;overflow:visible;box-shadow:var(--shadow-lg);}
+.board-label{position:absolute;top:7px;left:9px;font-size:7px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.15em;text-transform:uppercase;font-family:var(--font-mono);}
+.board-logo{position:absolute;top:7px;right:9px;font-size:8px;color:rgba(0,200,255,.8);font-weight:700;font-family:var(--font-mono);}
+.pin-row{position:absolute;display:flex;flex-direction:column;gap:3px;}
+.pin-row.left{left:-9px;top:30px;}
+.pin-row.right{right:-9px;top:30px;}
+.pin-hole{width:9px;height:9px;border-radius:50%;background:#1a1a1a;border:1.5px solid #555;position:relative;cursor:crosshair;transition:all .15s;flex-shrink:0;}
+.pin-hole:hover{border-color:var(--accent);box-shadow:0 0 8px rgba(37,99,235,.6);}
+.pin-hole.connected{background:#2a2a2a;border-color:inherit;}
+.pin-label{position:absolute;font-size:6px;color:rgba(255,255,255,.5);font-family:var(--font-mono);white-space:nowrap;pointer-events:none;}
+.pin-row.left .pin-label{left:11px;top:50%;transform:translateY(-50%);}
+.pin-row.right .pin-label{right:11px;top:50%;transform:translateY(-50%);}
+.ic-chip{position:absolute;border-radius:3px;background:#1a1a1a;border:1px solid #333;}
+.crystal{position:absolute;width:12px;height:24px;background:linear-gradient(#c8c8a0,#a0a080);border-radius:3px;border:1px solid #888;}
+.usb-port{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:30px;height:13px;background:#aaa;border-radius:2px;border:1px solid #888;}
+.usb-inner{position:absolute;inset:2px;background:#555;border-radius:1px;}
+.reset-btn{position:absolute;width:9px;height:9px;border-radius:50%;background:radial-gradient(circle,#e44 60%,#a00);border:1px solid #800;cursor:pointer;}
+
+/* Sensor cards */
+.sensor-card{border-radius:8px;position:relative;box-shadow:var(--shadow);}
+.ultrasonic{width:95px;height:55px;background:linear-gradient(135deg,#1c2a3a 0%,#243545 100%);border:2px solid #1a2535;border-radius:7px;position:relative;}
+.sonar-eye{position:absolute;width:24px;height:24px;border-radius:50%;border:2px solid #3a5a7a;display:flex;align-items:center;justify-content:center;top:12px;overflow:visible;}
+.sonar-inner{width:15px;height:15px;border-radius:50%;background:radial-gradient(circle,#3a8a4a 30%,#2a6a3a 100%);}
+.sonar-eye::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:1px solid rgba(0,255,100,.2);animation:sonar-pulse 2s ease-out infinite;}
+.sonar-label{position:absolute;bottom:5px;left:0;right:0;text-align:center;font-size:6px;color:rgba(255,255,255,.5);font-family:var(--font-mono);letter-spacing:.1em;}
+.sonar-pins{position:absolute;bottom:-7px;left:0;right:0;display:flex;justify-content:space-around;padding:0 6px;}
+.sonar-pin{width:5px;height:9px;background:#c8a020;border-radius:1px;cursor:crosshair;}
+.sonar-pin:hover{background:var(--accent);box-shadow:0 0 4px rgba(37,99,235,.6);}
+
+/* LCD */
+.lcd-board{width:85px;height:58px;background:#1a2a1a;border:2px solid #0a1a0a;border-radius:6px;position:relative;box-shadow:var(--shadow);}
+.lcd-screen{position:absolute;top:6px;left:5px;right:5px;height:36px;background:#2a4a10;border:1px solid #1a3a08;border-radius:3px;overflow:hidden;}
+.lcd-chars{font-family:var(--font-mono);font-size:5.5px;color:#88ff44;padding:3px;line-height:1.6;letter-spacing:.1em;}
+.lcd-pins{position:absolute;bottom:-7px;left:4px;display:flex;gap:5px;}
+.lcd-pin{width:4px;height:8px;background:#c8a020;border-radius:1px;}
+
+/* LED */
+.led-comp{width:26px;height:36px;display:flex;flex-direction:column;align-items:center;}
+.led-body{width:14px;height:16px;border-radius:50% 50% 30% 30%;border:1.5px solid rgba(0,0,0,.15);transition:all .3s;position:relative;}
+.led-legs{display:flex;gap:5px;margin-top:2px;}
+.led-leg{width:1.5px;height:12px;background:#aaa;}
+.led-leg.long{height:14px;}
+
+/* Sensor value chip */
+.val-chip{position:absolute;top:-30px;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:3px 10px;font-size:10px;font-family:var(--font-mono);color:var(--accent);white-space:nowrap;font-weight:700;z-index:10;pointer-events:none;box-shadow:var(--shadow-sm);}
+
+/* Block diagram overlay */
+#block-overlay{position:absolute;inset:0;z-index:15;background:rgba(15,23,42,.7);display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+#block-overlay.show{display:flex;}
+
+/* Drag handle */
+.drag-handle{position:absolute;top:0;left:0;right:0;height:16px;cursor:move;z-index:5;display:flex;align-items:center;justify-content:center;border-radius:6px 6px 0 0;}
+.drag-dots{display:flex;gap:2px;}
+.drag-dot{width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,.25);}
+
+/* Tooltip */
+.pin-tooltip{position:absolute;background:var(--text);color:#fff;border-radius:5px;padding:3px 8px;font-size:9px;font-family:var(--font-mono);white-space:nowrap;z-index:99;pointer-events:none;display:none;}
+
+/* ESP32 component */
+.esp32-board{width:90px;height:120px;background:linear-gradient(135deg,#1a1a3a,#252550);border:2px solid #1a1a4a;border-radius:7px;position:relative;box-shadow:var(--shadow-lg);}
+
+/* Buzzer */
+.buzzer-comp{width:38px;height:38px;border-radius:50%;background:radial-gradient(circle,#333,#111);border:3px solid #444;position:relative;}
+
+/* Servo */
+.servo-comp{width:60px;height:40px;background:linear-gradient(135deg,#2a3a4a,#1a2a3a);border:2px solid #1a2a3a;border-radius:6px;position:relative;}
+
+/* Relay */
+.relay-comp{width:70px;height:45px;background:linear-gradient(135deg,#1a0a0a,#2a1010);border:2px solid #3a1a1a;border-radius:6px;position:relative;}
+
+/* Photoresistor */
+.ldr-comp{width:28px;height:36px;background:#f8e4a0;border:2px solid #c8a040;border-radius:5px;position:relative;}
+
+/* Keyframes */
+@keyframes sonar-pulse{0%{opacity:.8;transform:scale(1)}100%{opacity:0;transform:scale(2.5)}}
+@keyframes ai-bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes data-flow{0%{stroke-dashoffset:20}100%{stroke-dashoffset:0}}
+@keyframes pulse-glow{0%,100%{opacity:.7}50%{opacity:1}}
+@keyframes upload-flash{0%,100%{opacity:1}50%{opacity:.4}}
+.uploading .code-btn-run{animation:upload-flash .5s infinite;}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--border2)}
+input::placeholder{color:var(--text3)}
+
+/* Status badge */
+.status-bar{display:flex;align-items:center;gap:8px;padding:6px 14px;background:var(--surface2);border-top:1px solid var(--border);font-size:10px;color:var(--text2);font-weight:600;}
+.status-item{display:flex;align-items:center;gap:4px;}
+.status-dot{width:6px;height:6px;border-radius:50%;background:var(--text3);}
+.status-dot.green{background:var(--green);}
+.status-dot.blue{background:var(--accent);}
+.status-dot.amber{background:var(--amber);}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div id="topbar">
+  <div class="logo">
+    <div class="logo-icon">⚡</div>
+    <div><div class="logo-text">IoT Virtual Lab</div><div class="logo-sub">Interactive Workbench</div></div>
+  </div>
+  <div class="divider"></div>
+  <button class="tab-btn active" onclick="switchMainTab('lab')" id="tab-lab">🔬 Lab</button>
+  <button class="tab-btn" onclick="switchMainTab('modules')" id="tab-modules">📦 Modules</button>
+  <button class="tab-btn" onclick="showBlockDiagram()" id="tab-block">📊 Block Diagram</button>
+  <div class="spacer"></div>
+  <div class="sim-badge">
+    <div class="sim-dot" id="sim-dot"></div>
+    <span class="sim-label off" id="sim-label">IDLE</span>
+  </div>
+  <button class="ctrl-btn btn-upload" onclick="uploadCode()" id="upload-btn">⬆ Upload</button>
+  <button class="ctrl-btn btn-run" onclick="toggleSim()" id="run-btn">▶ Run</button>
+  <button class="ctrl-btn btn-clear" onclick="clearCanvas()">✕ Clear</button>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+  <!-- LEFT TOGGLE -->
+  <div class="sidebar-toggle" id="toggle-left" onclick="toggleLeftSidebar()" title="Toggle Components Panel">◀</div>
+
+  <!-- LEFT PANEL -->
+  <div id="comp-panel">
+    <div class="panel-hdr"><span class="panel-hdr-txt">⚙ Components</span></div>
+    <div class="panel-search"><span>🔍</span><input placeholder="Search..." oninput="filterComponents(this.value)"/></div>
+    <div class="comp-list" id="comp-list">
+      <div class="comp-cat">Microcontrollers</div>
+      <div class="comp-item" draggable="true" ondragstart="startDrag(event,'arduino')">
+        <div class="comp-thumb" style="background:linear-gradient(135deg,#1a4a1a,#1f5c1f);border:1px solid #0a2a0a;"><span style="color:#88ff44;font-size:8px;">UNO</span></div>
+        <div><div class="comp-name">Arduino Uno</div><div class="comp-type">ATmega328P</div></div>
+      </div>
+      <div class="comp-item" draggable="true" ondragstart="startDrag(event,'esp32')">
+        <div class="comp-thumb" style="background:linear-gradient(135deg,#1a1a3a,#252550);border:1px solid #1a1a4a;"><span style="color:#aabbff;font-size:7px;">ESP32</span></div>
+        <div><div class="comp-name">ESP32</div><div class="comp-type">WiFi/BT MCU</div></div>
+      </div>
+
+      <div class="comp-cat">Sensors</div>
+      <div class="comp-item" draggable="true" ondragstart="startDrag(event,'ultrasonic')">
+        <div class="comp-thumb" style="background:linear-gradient(135deg,#1c2a3a,#243545);border:1px solid #1a2535;position:relative;">
+          <div style="display:flex;gap:4px;"><div style="width:9px;height:9px;border-radius:50%;border:1.5px solid #3a5a7a;background:#2a5a3a;"></div><div style="width:9px;height:9px;border-radius:50%;border:1.5px solid #3a5a7a;background:#2a5a3a;"></div></div>
+        </div>
+        <div><div class="comp-name">HC-SR04</div><div class="comp-type">Ultrasonic</div></div>
+      </div>
+      <div class="comp-item" draggable="true" ondragstart="startDrag(event,'dht22')">
+        <div class="comp-thumb" style="background:#2a1a0a;border:1px solid #3a2a0a;"><span style="color:#ffaa44;font-size:7px;font-family:var(--font-mono);">DHT</span></div>
+        <div><div class="comp-name">DHT22</div><div class="comp-type">Temp/Humidity</div></div>
+      </div>
+      <div class="comp-item" draggable="true" ondragstart="startDrag(event,'ldr')">
+        <div class="comp-thumb" style="background:#f8e4a0;border:1px solid #c8a040;"><span style="color:#8B6914;font-size:7px;font-family:var(--font-mono);">LDR</span></div>
+        <div><div class="comp-name">Photoresistor</div><div class="comp-type">Light Sensor</div></div>
+      </div>
+      <div class="comp-item" draggable="true" ondragstart="startDrag(event,'pir')">
+        <div class="comp-thumb" style="background:linear-gradient(135deg,#2a0a2a,#3a1a3a);border:1px solid #4a2a4a;"><span style="color:#ff88ff;font-size:7px;">PIR</span></div>
+        <div><div class="comp-name">PIR Sensor</div><div class="comp-type">Motion</div></div>
+      </div>
+
+      <div class="comp-cat">Outputs</div>
+      <div class="comp-item" draggable="true" ondragstart="startDrag(event,'lcd')">
+        <div class="comp-thumb" style="background:#1a2a1a;border:1px solid #0a1a0a;"><div style="background:#2a4a10;width:26px;height:14px;border-radius:2px;margin:0 auto;"></div></div>
+        <div><div class="comp-name">LCD 16×2</div><div class="comp-type">I2C Display</div></div>
+      </div>
+      <div class="comp-item" draggable="true" ondragstart="startDrag(event,'led_red')">
+        <div class="comp-thumb" style="background:transparent;"><div style="width:12px;height:14px;border-radius:50% 50% 30% 30%;background:radial-gradient(circle at 35% 30%,#ff6666,#cc0000);border:1px solid #660000;margin:0 auto;"></div></div>
+        <div><div class="comp-name">LED Red</div><div class="comp-type">Indicator</div></div>
+      </div>
+      <div class="comp-item" draggable="true" ondragstart="startDrag(event,'led_green')">
+        <div class="comp-thumb" style="background:transparent;"><div style="width:12px;height:14px;border-radius:50% 50% 30% 30%;background:radial-gradient(circle at 35% 30%,#66ff88,#00cc44);border:1px solid #006622;margin:0 auto;"></div></div>
+        <div><div class="comp-name">LED Green</div><div class="comp-type">Indicator</div></div>
+      </div>
+      <div class="comp-item" draggable="true" ondragstart="startDrag(event,'buzzer')">
+        <div class="comp-thumb" style="background:transparent;"><div style="width:18px;height:18px;border-radius:50%;background:radial-gradient(circle,#333,#111);border:2px solid #555;margin:0 auto;"></div></div>
+        <div><div class="comp-name">Buzzer</div><div class="comp-type">Piezo</div></div>
+      </div>
+      <div class="comp-item" draggable="true" ondragstart="startDrag(event,'relay')">
+        <div class="comp-thumb" style="background:linear-gradient(135deg,#2a1a1a,#3a1a1a);border:1px solid #5a2a2a;"><span style="color:#ff8888;font-size:7px;">RELAY</span></div>
+        <div><div class="comp-name">Relay Module</div><div class="comp-type">5V Single</div></div>
+      </div>
+      <div class="comp-item" draggable="true" ondragstart="startDrag(event,'servo')">
+        <div class="comp-thumb" style="background:linear-gradient(135deg,#2a3a4a,#1a2a3a);border:1px solid #1a2a3a;"><span style="color:#88aaff;font-size:6px;">SERVO</span></div>
+        <div><div class="comp-name">Servo SG90</div><div class="comp-type">180° Actuator</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CENTER CANVAS -->
+  <div id="canvas-wrap" ondragover="e=>e.preventDefault()" ondrop="dropComp(event)">
+    <div id="canvas-bg"></div>
+    <svg id="wire-svg"></svg>
+    <div id="nodes-layer"></div>
+    <div id="canvas-hint">
+      <div class="hint-icon">🔌</div>
+      <div class="hint-txt">
+        <div style="font-size:16px;font-weight:700;color:var(--text2);margin-bottom:8px;">Start Building!</div>
+        <div class="hint-pill">Drag components</div> from the left panel<br>
+        Click <div class="hint-pill">pin holes</div> to draw wires<br>
+        Load a <div class="hint-pill">📦 Module</div> to auto-wire
+      </div>
+    </div>
+    <!-- Block diagram overlay -->
+    <div id="block-overlay" onclick="hideBlockDiagram(event)">
+      <svg id="block-svg" width="700" height="440" viewBox="0 0 700 440" style="background:#fff;border-radius:16px;border:1px solid var(--border);box-shadow:var(--shadow-lg);"></svg>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div id="right-panel">
+    <div class="rpanel-tabs">
+      <button class="rpanel-tab active" onclick="switchRTab('guide')" id="rt-guide">Guide</button>
+      <button class="rpanel-tab" onclick="switchRTab('code')" id="rt-code">Code</button>
+      <button class="rpanel-tab" onclick="switchRTab('ai')" id="rt-ai">AI Help</button>
+    </div>
+    <div class="rpanel-body" id="rpanel-body">
+      <!-- Guide -->
+      <div id="guide-body">
+        <div style="padding:14px 14px 6px;font-size:12px;color:var(--text2);">Select a module or load components to begin guided wiring.</div>
+      </div>
+      <!-- Code (hidden) -->
+      <div id="code-body" style="display:none;flex:1;flex-direction:column;">
+        <div class="code-toolbar">
+          <span class="code-label">📄 Sketch.ino</span>
+          <button class="code-btn code-btn-copy" onclick="copyCode()">📋 Copy</button>
+          <button class="code-btn code-btn-run" onclick="uploadCode()">⬆ Upload</button>
+        </div>
+        <textarea id="code-editor" spellcheck="false">// Select a module to load code...</textarea>
+        <div id="debug-console">
+          <div class="console-hdr">
+            <span class="console-title">⬛ Serial Monitor</span>
+            <button class="console-clear" onclick="clearConsole()">Clear</button>
+          </div>
+          <div id="console-out"><span class="log-info"><span class="log-time">[00:00]</span>Waiting for upload...</span></div>
+        </div>
+      </div>
+      <!-- AI (hidden) -->
+      <div id="ai-body" style="display:none;flex:1;flex-direction:column;">
+        <div class="ai-msgs" id="ai-msgs">
+          <div class="ai-msg"><div class="ai-from bot">AI ASSISTANT</div><div class="ai-bubble bot">Hey! I'm your IoT circuit assistant. Load a module or ask me anything about wiring, code, or theory! ⚡</div></div>
+        </div>
+        <div class="ai-quick" id="ai-quick">
+          <button class="aq-btn" onclick="quickAsk('How does HC-SR04 work?')">HC-SR04?</button>
+          <button class="aq-btn" onclick="quickAsk('Why use a resistor with LED?')">LED resistor?</button>
+          <button class="aq-btn" onclick="quickAsk('Explain the code logic')">Code logic?</button>
+          <button class="aq-btn" onclick="quickAsk('How does DHT22 differ from DHT11?')">DHT22 vs DHT11?</button>
+        </div>
+        <div class="ai-input-row">
+          <input class="ai-input" id="ai-input" placeholder="Ask about your circuit..." onkeydown="if(event.key==='Enter')sendAI()"/>
+          <button class="ai-send" onclick="sendAI()">↑</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT TOGGLE -->
+  <div class="sidebar-toggle" id="toggle-right" onclick="toggleRightSidebar()" title="Toggle Guide/Code Panel">▶</div>
+</div>
+
+<!-- Modules tab content (hidden by default) -->
+<div id="modules-view" style="display:none;position:absolute;inset:52px 0 0 0;overflow-y:auto;background:var(--bg);">
+  <div style="max-width:980px;margin:0 auto;padding:24px 28px;">
+    <div class="modules-header">
+      <div class="modules-title">📦 Learning Modules</div>
+      <div class="modules-sub">Auto-wire components and get step-by-step instructions with real Arduino/ESP32 code.</div>
+    </div>
+    <div class="modules-filters">
+      <button class="filter-btn active" onclick="filterModules('all',this)">All Modules</button>
+      <button class="filter-btn" onclick="filterModules('Beginner',this)">Beginner</button>
+      <button class="filter-btn" onclick="filterModules('Intermediate',this)">Intermediate</button>
+      <button class="filter-btn" onclick="filterModules('Advanced',this)">Advanced</button>
+    </div>
+    <div id="mod-grid"></div>
+  </div>
+</div>
+
+<script>
+// ─── CONFIG ───────────────────────────────────────────────────────────────────
+const API_URL = localStorage.getItem('nexus-server-url') || 'http://localhost:3001';
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let nodes = [], wires = [], draggingComp = null, wiringFrom = null;
+let simRunning = false, simInterval = null;
+let currentModule = null, currentStep = 0;
+let nodeIdCounter = 0, rightTab = 'guide', mainTab = 'lab';
+let simState = {t: 0};
+let messages = [];
+
+// ─── SIDEBAR TOGGLE ───────────────────────────────────────────────────────────
+let leftPanelCollapsed = false;
+let rightPanelCollapsed = false;
+
+function toggleLeftSidebar() {
+  leftPanelCollapsed = !leftPanelCollapsed;
+  const panel = document.getElementById('comp-panel');
+  const toggleBtn = document.getElementById('toggle-left');
+  
+  if (leftPanelCollapsed) {
+    panel.classList.add('collapsed');
+    toggleBtn.textContent = '▶';
+    toggleBtn.style.borderRadius = '8px 8px 8px 8px';
+  } else {
+    panel.classList.remove('collapsed');
+    toggleBtn.textContent = '◀';
+    toggleBtn.style.borderRadius = '0 8px 8px 0';
+  }
+  localStorage.setItem('leftPanelCollapsed', leftPanelCollapsed);
+}
+
+function toggleRightSidebar() {
+  rightPanelCollapsed = !rightPanelCollapsed;
+  const panel = document.getElementById('right-panel');
+  const toggleBtn = document.getElementById('toggle-right');
+  
+  if (rightPanelCollapsed) {
+    panel.classList.add('collapsed');
+    toggleBtn.textContent = '◀';
+    toggleBtn.style.borderRadius = '8px 8px 8px 8px';
+  } else {
+    panel.classList.remove('collapsed');
+    toggleBtn.textContent = '▶';
+    toggleBtn.style.borderRadius = '8px 8px 8px 8px';
+  }
+  localStorage.setItem('rightPanelCollapsed', rightPanelCollapsed);
+}
+
+// Restore sidebar states on load
+function restoreSidebarStates() {
+  const leftCollapsed = localStorage.getItem('leftPanelCollapsed') === 'true';
+  const rightCollapsed = localStorage.getItem('rightPanelCollapsed') === 'true';
+  
+  if (leftCollapsed) {
+    leftPanelCollapsed = true;
+    const panel = document.getElementById('comp-panel');
+    const toggleBtn = document.getElementById('toggle-left');
+    panel.classList.add('collapsed');
+    toggleBtn.textContent = '▶';
+    toggleBtn.style.borderRadius = '8px 8px 8px 8px';
+  }
+  
+  if (rightCollapsed) {
+    rightPanelCollapsed = true;
+    const panel = document.getElementById('right-panel');
+    const toggleBtn = document.getElementById('toggle-right');
+    panel.classList.add('collapsed');
+    toggleBtn.textContent = '◀';
+    toggleBtn.style.borderRadius = '8px 8px 8px 8px';
+  }
+}
+
+// ─── MODULES ──────────────────────────────────────────────────────────────────
+const MODULES = [
+  {
+    id: 'ultrasonic_distance',
+    icon: '📡',
+    title: 'Ultrasonic Distance Meter',
+    desc: 'Connect HC-SR04 to Arduino. Measure distance in cm and display on Serial Monitor with LED alert when object is close.',
+    difficulty: 'Beginner',
+    topic: 'Sensors',
+    components: [
+      {id:'ard1', type:'arduino', x:280, y:80},
+      {id:'hcsr1', type:'ultrasonic', x:80, y:160},
+      {id:'led1', type:'led_red', x:490, y:160},
+    ],
+    wires: [
+      {from:'hcsr1', fromPin:'VCC',  to:'ard1', toPin:'5V',   color:'#ef4444'},
+      {from:'hcsr1', fromPin:'GND',  to:'ard1', toPin:'GND',  color:'#475569'},
+      {from:'hcsr1', fromPin:'TRIG', to:'ard1', toPin:'D9',   color:'#eab308'},
+      {from:'hcsr1', fromPin:'ECHO', to:'ard1', toPin:'D10',  color:'#3b82f6'},
+      {from:'led1',  fromPin:'ANODE',to:'ard1', toPin:'D13',  color:'#f97316'},
+      {from:'led1',  fromPin:'CATHODE',to:'ard1',toPin:'GND', color:'#475569'},
+    ],
+    steps: [
+      {title:'Power the Sensor', body:'Connect VCC pin of HC-SR04 to Arduino <span class="pin-tag">5V</span> using a red wire. Connect GND to Arduino <span class="pin-tag">GND</span> using a black wire.', wires:['#ef4444','#475569']},
+      {title:'TRIG → Pin 9', body:'Connect HC-SR04 <span class="pin-tag">TRIG</span> to Arduino digital pin <span class="pin-tag">D9</span> using a yellow wire. TRIG sends ultrasonic pulses at 40kHz.', wires:['#eab308']},
+      {title:'ECHO → Pin 10', body:'Connect HC-SR04 <span class="pin-tag">ECHO</span> to Arduino pin <span class="pin-tag">D10</span> using a blue wire. ECHO returns signal when pulse bounces back.', wires:['#3b82f6']},
+      {title:'LED Alert on Pin 13', body:'Connect LED anode (long leg) to <span class="pin-tag">D13</span> via 220Ω resistor. Cathode (short leg) to <span class="pin-tag">GND</span>. LED lights when distance < 20cm.', wires:['#f97316','#475569']},
+      {title:'Upload & Monitor', body:'Click ⬆ Upload to flash the code. Open Serial Monitor to see live distance readings. Move your hand near the sensor!', wires:[]},
+    ],
+    code: `// HC-SR04 Ultrasonic Distance Sensor
+// Arduino Uno | Pins: TRIG=9, ECHO=10, LED=13
+
+#define TRIG_PIN  9
+#define ECHO_PIN  10
+#define LED_PIN   13
+#define ALERT_CM  20
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(TRIG_PIN, OUTPUT);
+  pinMode(ECHO_PIN, INPUT);
+  pinMode(LED_PIN,  OUTPUT);
+  Serial.println("=== Distance Meter Ready ===");
+}
+
+void loop() {
+  long duration;
+  float distance;
+
+  // Trigger ultrasonic pulse
+  digitalWrite(TRIG_PIN, LOW);
+  delayMicroseconds(2);
+  digitalWrite(TRIG_PIN, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIG_PIN, LOW);
+
+  duration = pulseIn(ECHO_PIN, HIGH, 30000);
+  distance = (duration * 0.0343) / 2.0;
+
+  if (duration == 0) {
+    Serial.println("ERR: No echo. Check wiring.");
+    digitalWrite(LED_PIN, HIGH);
+    delay(200);
+    digitalWrite(LED_PIN, LOW);
+  } else {
+    Serial.print("Distance: ");
+    Serial.print(distance, 1);
+    Serial.print(" cm");
+    if (distance < ALERT_CM) {
+      Serial.println("  ⚠ ALERT: Object detected!");
+      digitalWrite(LED_PIN, HIGH);
+    } else {
+      Serial.println("  OK");
+      digitalWrite(LED_PIN, LOW);
+    }
+  }
+  delay(200);
+}`,
+    simulate: (state) => {
+      const dist = 10 + 60 * Math.abs(Math.sin(state.t / 25)) + (Math.random() - 0.5) * 3;
+      const close = dist < 20;
+      return { dist: dist.toFixed(1), led: close, serial: [`Distance: ${dist.toFixed(1)} cm${close ? '  ⚠ ALERT!' : '  OK'}`] };
+    },
+    blockDiagram: drawUltrasonicBlock,
+  },
+  {
+    id: 'temp_alert',
+    icon: '🌡️',
+    title: 'Temperature Alert System',
+    desc: 'DHT22 temperature & humidity sensor with LED alert when temperature exceeds 30°C. Real-time LCD display.',
+    difficulty: 'Beginner',
+    topic: 'Sensors',
+    components: [
+      {id:'ard2', type:'arduino', x:280, y:80},
+      {id:'dht1', type:'dht22',   x:80,  y:180},
+      {id:'lcd1', type:'lcd',     x:470, y:130},
+      {id:'led2', type:'led_red', x:490, y:280},
+    ],
+    wires: [
+      {from:'dht1', fromPin:'VCC',  to:'ard2', toPin:'5V',  color:'#ef4444'},
+      {from:'dht1', fromPin:'DATA', to:'ard2', toPin:'D4',  color:'#eab308'},
+      {from:'dht1', fromPin:'GND',  to:'ard2', toPin:'GND', color:'#475569'},
+      {from:'lcd1', fromPin:'VCC',  to:'ard2', toPin:'5V',  color:'#ef4444'},
+      {from:'lcd1', fromPin:'GND',  to:'ard2', toPin:'GND', color:'#475569'},
+      {from:'led2', fromPin:'ANODE',to:'ard2', toPin:'D13', color:'#f97316'},
+    ],
+    steps: [
+      {title:'Wire DHT22 Sensor', body:'Connect DHT22 <span class="pin-tag">VCC</span>→5V, <span class="pin-tag">DATA</span>→D4, <span class="pin-tag">GND</span>→GND. Add 10kΩ pull-up between DATA and VCC.', wires:['#ef4444','#eab308','#475569']},
+      {title:'Connect LCD Display', body:'Connect LCD <span class="pin-tag">VCC</span>→5V, <span class="pin-tag">GND</span>→GND, <span class="pin-tag">SDA</span>→A4, <span class="pin-tag">SCL</span>→A5 for I2C communication.', wires:['#ef4444','#475569']},
+      {title:'Alert LED on D13', body:'Wire LED with 220Ω resistor to pin <span class="pin-tag">D13</span>. It triggers when temperature exceeds 30°C.', wires:['#f97316']},
+      {title:'Upload & Test', body:'Upload the sketch. LCD shows live temperature & humidity. Breathe on the sensor to change values!', wires:[]},
+    ],
+    code: `// DHT22 Temperature Alert System
+#include <DHT.h>
+#include <LiquidCrystal_I2C.h>
+
+#define DHT_PIN  4
+#define DHT_TYPE DHT22
+#define LED_PIN  13
+#define TEMP_THRESHOLD 30.0
+
+DHT dht(DHT_PIN, DHT_TYPE);
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(LED_PIN, OUTPUT);
+  dht.begin();
+  lcd.init();
+  lcd.backlight();
+  lcd.print("Temp System Ready");
+  delay(2000);
+}
+
+void loop() {
+  float humidity    = dht.readHumidity();
+  float temperature = dht.readTemperature();
+
+  if (isnan(humidity) || isnan(temperature)) {
+    Serial.println("ERR: DHT22 read failed!");
+    return;
+  }
+
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Temp: " + String(temperature, 1) + " C");
+  lcd.setCursor(0, 1);
+  lcd.print("Humid: " + String(humidity, 0) + "%");
+
+  Serial.print("Temp: " + String(temperature, 1) + "C  ");
+  Serial.print("Humid: " + String(humidity, 0) + "%");
+
+  if (temperature > TEMP_THRESHOLD) {
+    Serial.println("  🔥 HIGH TEMP!");
+    digitalWrite(LED_PIN, HIGH);
+  } else {
+    Serial.println("  Normal");
+    digitalWrite(LED_PIN, LOW);
+  }
+  delay(2000);
+}`,
+    simulate: (state) => {
+      const temp = 24 + 10 * Math.sin(state.t / 40) + (Math.random() - 0.5) * 0.8;
+      const humid = 55 + 15 * Math.cos(state.t / 30) + (Math.random() - 0.5) * 2;
+      const hot = temp > 30;
+      return { temp: temp.toFixed(1), humid: humid.toFixed(0), led: hot, serial: [`Temp: ${temp.toFixed(1)}C  Humid: ${humid.toFixed(0)}%${hot ? '  🔥 HIGH TEMP!' : '  Normal'}`] };
+    },
+    blockDiagram: drawGenericBlock,
+  },
+  {
+    id: 'smart_light',
+    icon: '💡',
+    title: 'Smart Light Controller',
+    desc: 'LDR photoresistor auto-controls an LED based on ambient light level. Perfect intro to analog sensors and PWM.',
+    difficulty: 'Beginner',
+    topic: 'IoT Automation',
+    components: [
+      {id:'ard3', type:'arduino', x:280, y:80},
+      {id:'ldr1', type:'ldr',    x:80,  y:180},
+      {id:'led3', type:'led_green', x:490, y:170},
+    ],
+    wires: [
+      {from:'ldr1', fromPin:'VCC',  to:'ard3', toPin:'5V',  color:'#ef4444'},
+      {from:'ldr1', fromPin:'OUT',  to:'ard3', toPin:'A0',  color:'#eab308'},
+      {from:'ldr1', fromPin:'GND',  to:'ard3', toPin:'GND', color:'#475569'},
+      {from:'led3', fromPin:'ANODE',to:'ard3', toPin:'D9',  color:'#22c55e'},
+      {from:'led3', fromPin:'CATHODE',to:'ard3',toPin:'GND',color:'#475569'},
+    ],
+    steps: [
+      {title:'Wire LDR Sensor', body:'Connect LDR to a 10kΩ voltage divider: one end to <span class="pin-tag">5V</span>, other end + resistor to <span class="pin-tag">GND</span>. Read midpoint on <span class="pin-tag">A0</span>.', wires:['#ef4444','#eab308','#475569']},
+      {title:'LED to PWM Pin', body:'Connect LED anode through 220Ω resistor to PWM pin <span class="pin-tag">D9</span>. PWM allows analog brightness control.', wires:['#22c55e','#475569']},
+      {title:'Test & Calibrate', body:'Cover the LDR with your hand — LED should brighten. Expose to light — LED dims. Adjust threshold in code.', wires:[]},
+    ],
+    code: `// Smart Light Controller - LDR + PWM LED
+// LDR on A0, LED on D9 (PWM)
+
+#define LDR_PIN  A0
+#define LED_PIN  9
+#define DARK_THRESHOLD 400
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(LED_PIN, OUTPUT);
+  Serial.println("=== Smart Light Ready ===");
+}
+
+void loop() {
+  int lightLevel = analogRead(LDR_PIN); // 0-1023
+  
+  // Map: dark=bright LED, bright=dim LED
+  int brightness = map(lightLevel, 0, 1023, 255, 0);
+  brightness = constrain(brightness, 0, 255);
+  
+  analogWrite(LED_PIN, brightness);
+
+  Serial.print("Light: ");
+  Serial.print(lightLevel);
+  Serial.print("  LED: ");
+  Serial.print(brightness);
+  Serial.println(lightLevel < DARK_THRESHOLD ? "  🌙 DARK - Light ON" : "  ☀️ BRIGHT - Light dim");
+
+  delay(300);
+}`,
+    simulate: (state) => {
+      const light = 300 + 500 * Math.abs(Math.sin(state.t / 20));
+      const bright = Math.max(0, Math.min(255, 255 - Math.round(light * 255 / 1023)));
+      const isDark = light < 400;
+      return { ldr: light.toFixed(0), led: isDark, serial: [`Light: ${light.toFixed(0)}  LED: ${bright}${isDark ? '  🌙 DARK' : '  ☀️ BRIGHT'}`] };
+    },
+    blockDiagram: drawGenericBlock,
+  },
+  {
+    id: 'motion_alarm',
+    icon: '🚨',
+    title: 'Motion-Activated Alarm',
+    desc: 'PIR sensor detects motion and triggers a buzzer + LED alarm. Great for home security projects.',
+    difficulty: 'Beginner',
+    topic: 'IoT Security',
+    components: [
+      {id:'ard4', type:'arduino', x:280, y:80},
+      {id:'pir1', type:'pir',    x:80,  y:170},
+      {id:'buz1', type:'buzzer', x:490, y:150},
+      {id:'led4', type:'led_red',x:490, y:270},
+    ],
+    wires: [
+      {from:'pir1', fromPin:'VCC',  to:'ard4', toPin:'5V',  color:'#ef4444'},
+      {from:'pir1', fromPin:'OUT',  to:'ard4', toPin:'D2',  color:'#eab308'},
+      {from:'pir1', fromPin:'GND',  to:'ard4', toPin:'GND', color:'#475569'},
+      {from:'buz1', fromPin:'ANODE',to:'ard4', toPin:'D8',  color:'#8b5cf6'},
+      {from:'led4', fromPin:'ANODE',to:'ard4', toPin:'D13', color:'#f97316'},
+    ],
+    steps: [
+      {title:'Wire PIR Sensor', body:'PIR HC-SR501: <span class="pin-tag">VCC</span>→5V, <span class="pin-tag">OUT</span>→D2 (interrupt pin), <span class="pin-tag">GND</span>→GND. Allow 60s warm-up time!', wires:['#ef4444','#eab308','#475569']},
+      {title:'Connect Buzzer', body:'Wire passive buzzer to <span class="pin-tag">D8</span> (can generate tones). Add 100Ω resistor in series for protection.', wires:['#8b5cf6']},
+      {title:'LED Indicator D13', body:'LED on <span class="pin-tag">D13</span> flashes during alarm. Use built-in LED or external with 220Ω resistor.', wires:['#f97316']},
+      {title:'Test Motion', body:'Walk past the sensor. Buzzer beeps and LED flashes for 5 seconds. Adjust sensitivity potentiometer on PIR.', wires:[]},
+    ],
+    code: `// Motion-Activated Alarm System
+// PIR on D2, Buzzer on D8, LED on D13
+
+#define PIR_PIN    2
+#define BUZZER_PIN 8
+#define LED_PIN    13
+#define ALARM_TIME 5000  // 5 seconds
+
+bool alarmActive = false;
+unsigned long alarmStart = 0;
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(PIR_PIN, INPUT);
+  pinMode(BUZZER_PIN, OUTPUT);
+  pinMode(LED_PIN, OUTPUT);
+  Serial.println("=== Motion Alarm Ready ===");
+  Serial.println("Warming up PIR... (60s)");
+  delay(2000); // Shortened for demo
+}
+
+void loop() {
+  int motion = digitalRead(PIR_PIN);
+  
+  if (motion == HIGH && !alarmActive) {
+    alarmActive = true;
+    alarmStart = millis();
+    Serial.println("🚨 MOTION DETECTED! Alarm ON!");
+  }
+
+  if (alarmActive) {
+    // Beep pattern
+    tone(BUZZER_PIN, 1000, 100);
+    digitalWrite(LED_PIN, HIGH);
+    delay(150);
+    digitalWrite(LED_PIN, LOW);
+    delay(150);
+    
+    if (millis() - alarmStart > ALARM_TIME) {
+      alarmActive = false;
+      noTone(BUZZER_PIN);
+      digitalWrite(LED_PIN, LOW);
+      Serial.println("✅ Alarm cleared. Monitoring...");
+    }
+  }
+}`,
+    simulate: (state) => {
+      const motion = Math.sin(state.t / 15) > 0.7;
+      return { pir: motion, led: motion, buzzer: motion, serial: [motion ? '🚨 MOTION DETECTED!' : '👁 Monitoring...'] };
+    },
+    blockDiagram: drawGenericBlock,
+  },
+  {
+    id: 'esp32_wifi_monitor',
+    icon: '📶',
+    title: 'ESP32 WiFi Sensor Monitor',
+    desc: 'Stream DHT22 sensor data over WiFi. ESP32 creates a web server — view live readings in your browser.',
+    difficulty: 'Intermediate',
+    topic: 'IoT WiFi',
+    components: [
+      {id:'esp1', type:'esp32',  x:270, y:80},
+      {id:'dht2', type:'dht22', x:80,  y:180},
+      {id:'led5', type:'led_green', x:490, y:170},
+    ],
+    wires: [
+      {from:'dht2', fromPin:'VCC',  to:'esp1', toPin:'3V3', color:'#ef4444'},
+      {from:'dht2', fromPin:'DATA', to:'esp1', toPin:'GPIO4',color:'#eab308'},
+      {from:'dht2', fromPin:'GND',  to:'esp1', toPin:'GND', color:'#475569'},
+      {from:'led5', fromPin:'ANODE',to:'esp1', toPin:'GPIO2',color:'#22c55e'},
+    ],
+    steps: [
+      {title:'Configure WiFi', body:'Edit the SSID and PASSWORD in code. ESP32 will connect to your network on boot. Check Serial Monitor for IP address.', wires:[]},
+      {title:'Wire DHT22 to ESP32', body:'Connect DHT22 <span class="pin-tag">VCC</span>→3.3V, <span class="pin-tag">DATA</span>→GPIO4, <span class="pin-tag">GND</span>→GND. Use 3.3V — ESP32 is NOT 5V tolerant!', wires:['#ef4444','#eab308','#475569']},
+      {title:'Status LED GPIO2', body:'Built-in LED on GPIO2 blinks when connected. Wire external LED for custom status indicator.', wires:['#22c55e']},
+      {title:'Open Browser', body:'After upload, open Serial Monitor to find IP address. Type it in browser — see live sensor data!', wires:[]},
+    ],
+    code: `// ESP32 WiFi Sensor Web Server
+#include <WiFi.h>
+#include <WebServer.h>
+#include <DHT.h>
+
+const char* ssid = "YOUR_WIFI_NAME";
+const char* password = "YOUR_WIFI_PASS";
+
+#define DHT_PIN  4
+#define LED_PIN  2
+DHT dht(DHT_PIN, DHT22);
+WebServer server(80);
+
+float temperature, humidity;
+
+void handleRoot() {
+  String html = "<!DOCTYPE html><html><head>";
+  html += "<meta http-equiv='refresh' content='2'>";
+  html += "<title>ESP32 Sensor</title></head><body>";
+  html += "<h1>🌡️ IoT Sensor Dashboard</h1>";
+  html += "<p>Temperature: <b>" + String(temperature,1) + " °C</b></p>";
+  html += "<p>Humidity: <b>" + String(humidity,0) + " %</b></p>";
+  html += "</body></html>";
+  server.send(200, "text/html", html);
+}
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(LED_PIN, OUTPUT);
+  dht.begin();
+  
+  WiFi.begin(ssid, password);
+  Serial.print("Connecting...");
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500); Serial.print(".");
+  }
+  Serial.println("\\n✅ Connected! IP: " + WiFi.localIP().toString());
+  
+  server.on("/", handleRoot);
+  server.begin();
+}
+
+void loop() {
+  temperature = dht.readTemperature();
+  humidity    = dht.readHumidity();
+  server.handleClient();
+  digitalWrite(LED_PIN, !digitalRead(LED_PIN)); // blink
+  delay(2000);
+}`,
+    simulate: (state) => {
+      const temp = 22 + 8 * Math.sin(state.t / 30);
+      const humid = 50 + 20 * Math.cos(state.t / 25);
+      return { temp: temp.toFixed(1), humid: humid.toFixed(0), led: true, serial: [`[WiFi] GET / | Temp:${temp.toFixed(1)}°C Humid:${humid.toFixed(0)}%`] };
+    },
+    blockDiagram: drawGenericBlock,
+  },
+  {
+    id: 'servo_control',
+    icon: '🤖',
+    title: 'Servo Motor Controller',
+    desc: 'Control a servo motor angle using a potentiometer. Learn PWM signals and motor control fundamentals.',
+    difficulty: 'Beginner',
+    topic: 'Actuators',
+    components: [
+      {id:'ard5', type:'arduino', x:280, y:80},
+      {id:'srv1', type:'servo',  x:80,  y:180},
+      {id:'lcd2', type:'lcd',    x:470, y:130},
+    ],
+    wires: [
+      {from:'srv1', fromPin:'VCC',   to:'ard5', toPin:'5V',  color:'#ef4444'},
+      {from:'srv1', fromPin:'GND',   to:'ard5', toPin:'GND', color:'#475569'},
+      {from:'srv1', fromPin:'SIGNAL',to:'ard5', toPin:'D9',  color:'#f97316'},
+      {from:'lcd2', fromPin:'VCC',   to:'ard5', toPin:'5V',  color:'#ef4444'},
+      {from:'lcd2', fromPin:'GND',   to:'ard5', toPin:'GND', color:'#475569'},
+    ],
+    steps: [
+      {title:'Wire Servo Motor', body:'Servo has 3 wires: <span class="pin-tag">Red→5V</span>, <span class="pin-tag">Brown→GND</span>, <span class="pin-tag">Orange→D9</span> (PWM pin). SG90 draws ~600mA stall current.', wires:['#ef4444','#475569','#f97316']},
+      {title:'Add LCD Display', body:'I2C LCD shows current angle. Connect <span class="pin-tag">SDA→A4</span>, <span class="pin-tag">SCL→A5</span>.', wires:['#ef4444','#475569']},
+      {title:'Potentiometer (Optional)', body:'Wire a 10kΩ potentiometer to <span class="pin-tag">A0</span> for manual servo control. Center wiper goes to A0.', wires:[]},
+      {title:'Upload & Control', body:'Servo sweeps 0°→90°→180°→0°. Twist the potentiometer to override and set exact angle.', wires:[]},
+    ],
+    code: `// Servo Motor Controller with LCD
+#include <Servo.h>
+#include <LiquidCrystal_I2C.h>
+
+#define SERVO_PIN  9
+#define POT_PIN    A0
+
+Servo myServo;
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+void setup() {
+  Serial.begin(9600);
+  myServo.attach(SERVO_PIN);
+  lcd.init();
+  lcd.backlight();
+  Serial.println("=== Servo Controller ===");
+}
+
+void loop() {
+  int potVal = analogRead(POT_PIN);
+  int angle = map(potVal, 0, 1023, 0, 180);
+  
+  myServo.write(angle);
+  
+  lcd.setCursor(0, 0);
+  lcd.print("Servo Controller");
+  lcd.setCursor(0, 1);
+  lcd.print("Angle: " + String(angle) + " deg   ");
+  
+  Serial.println("Angle: " + String(angle) + "°");
+  delay(20);
+}`,
+    simulate: (state) => {
+      const angle = Math.round(90 + 90 * Math.sin(state.t / 20));
+      return { servo: angle, serial: [`Angle: ${angle}°`] };
+    },
+    blockDiagram: drawGenericBlock,
+  },
+  {
+    id: 'relay_home',
+    icon: '🏠',
+    title: 'Home Automation Relay',
+    desc: 'Use a relay module to control 220V appliances with Arduino. Toggle lights, fans using digital output.',
+    difficulty: 'Intermediate',
+    topic: 'IoT Automation',
+    components: [
+      {id:'ard6', type:'arduino', x:280, y:80},
+      {id:'rel1', type:'relay',  x:80,  y:180},
+      {id:'pir2', type:'pir',   x:490, y:180},
+    ],
+    wires: [
+      {from:'rel1', fromPin:'VCC',   to:'ard6', toPin:'5V',  color:'#ef4444'},
+      {from:'rel1', fromPin:'GND',   to:'ard6', toPin:'GND', color:'#475569'},
+      {from:'rel1', fromPin:'IN',    to:'ard6', toPin:'D7',  color:'#8b5cf6'},
+      {from:'pir2', fromPin:'VCC',   to:'ard6', toPin:'5V',  color:'#ef4444'},
+      {from:'pir2', fromPin:'OUT',   to:'ard6', toPin:'D2',  color:'#eab308'},
+    ],
+    steps: [
+      {title:'Wire Relay Module', body:'Relay: <span class="pin-tag">VCC</span>→5V, <span class="pin-tag">GND</span>→GND, <span class="pin-tag">IN</span>→D7. Relay activates LOW (active-low logic). ⚠️ HIGH VOLTAGE on COM/NO/NC!', wires:['#ef4444','#475569','#8b5cf6']},
+      {title:'PIR Motion Sensor', body:'Connect PIR sensor to <span class="pin-tag">D2</span> for motion-triggered automation. When motion detected, relay toggles appliance.', wires:['#ef4444','#eab308']},
+      {title:'Safety Warning', body:'⚠️ NEVER touch COM/NO/NC terminals while powered! The AC side carries 220V which is lethal. Always power off before wiring.', wires:[]},
+      {title:'Test Automation', body:'Motion detected → Relay clicks ON → Appliance turns on. No motion for 30s → Relay turns OFF.', wires:[]},
+    ],
+    code: `// Home Automation Relay with PIR
+// ⚠️ HIGH VOLTAGE WARNING: Never touch relay terminals!
+
+#define PIR_PIN    2
+#define RELAY_PIN  7  // Active LOW relay
+#define TIMEOUT    30000  // 30 seconds
+
+bool deviceOn = false;
+unsigned long lastMotion = 0;
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(PIR_PIN, INPUT);
+  pinMode(RELAY_PIN, OUTPUT);
+  digitalWrite(RELAY_PIN, HIGH); // Relay OFF (active LOW)
+  Serial.println("=== Home Automation Ready ===");
+}
+
+void loop() {
+  bool motion = digitalRead(PIR_PIN);
+  
+  if (motion) {
+    lastMotion = millis();
+    if (!deviceOn) {
+      deviceOn = true;
+      digitalWrite(RELAY_PIN, LOW); // Turn ON
+      Serial.println("💡 Motion! Device ON");
+    }
+  }
+
+  if (deviceOn && (millis() - lastMotion > TIMEOUT)) {
+    deviceOn = false;
+    digitalWrite(RELAY_PIN, HIGH); // Turn OFF
+    Serial.println("💤 No motion 30s. Device OFF");
+  }
+
+  delay(100);
+}`,
+    simulate: (state) => {
+      const motion = Math.sin(state.t / 20) > 0.5;
+      return { relay: motion, pir: motion, serial: [motion ? '💡 Motion! Device ON' : '👁 Monitoring...'] };
+    },
+    blockDiagram: drawGenericBlock,
+  },
+  {
+    id: 'plant_monitor',
+    icon: '🌱',
+    title: 'Smart Plant Monitor',
+    desc: 'Monitor soil moisture and temperature. Get alerts when your plant needs watering — a complete IoT garden sensor.',
+    difficulty: 'Intermediate',
+    topic: 'IoT Agriculture',
+    components: [
+      {id:'ard7', type:'arduino', x:280, y:80},
+      {id:'dht3', type:'dht22',  x:80,  y:160},
+      {id:'lcd3', type:'lcd',    x:470, y:130},
+      {id:'led6', type:'led_red',x:490, y:280},
+    ],
+    wires: [
+      {from:'dht3', fromPin:'VCC',  to:'ard7', toPin:'5V',  color:'#ef4444'},
+      {from:'dht3', fromPin:'DATA', to:'ard7', toPin:'D4',  color:'#eab308'},
+      {from:'dht3', fromPin:'GND',  to:'ard7', toPin:'GND', color:'#475569'},
+      {from:'lcd3', fromPin:'VCC',  to:'ard7', toPin:'5V',  color:'#ef4444'},
+      {from:'lcd3', fromPin:'GND',  to:'ard7', toPin:'GND', color:'#475569'},
+      {from:'led6', fromPin:'ANODE',to:'ard7', toPin:'D13', color:'#22c55e'},
+    ],
+    steps: [
+      {title:'Connect Soil Sensor', body:'Soil moisture sensor: <span class="pin-tag">VCC</span>→5V, <span class="pin-tag">GND</span>→GND, <span class="pin-tag">A0</span>→A0. Values: dry=1023, wet=0.', wires:['#ef4444','#475569']},
+      {title:'DHT22 for Temperature', body:'DHT22 <span class="pin-tag">DATA</span>→D4 with 10kΩ pull-up. Monitors temperature & humidity for optimal plant conditions.', wires:['#eab308']},
+      {title:'LCD Plant Dashboard', body:'I2C LCD shows soil moisture %, temperature, and watering status. Refreshes every 3 seconds.', wires:['#ef4444','#475569']},
+      {title:'Water Alert LED', body:'Green LED on <span class="pin-tag">D13</span> blinks rapidly when soil is dry (moisture < 30%). Time to water!', wires:['#22c55e']},
+    ],
+    code: `// Smart Plant Monitor
+// Soil sensor on A0, DHT22 on D4, LCD I2C
+
+#include <DHT.h>
+#include <LiquidCrystal_I2C.h>
+
+#define DHT_PIN   4
+#define SOIL_PIN  A0
+#define LED_PIN   13
+#define DRY_VALUE 600  // Adjust for your soil sensor
+
+DHT dht(DHT_PIN, DHT22);
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(LED_PIN, OUTPUT);
+  dht.begin();
+  lcd.init();
+  lcd.backlight();
+}
+
+void loop() {
+  int soilRaw  = analogRead(SOIL_PIN);
+  int moisture = map(soilRaw, 1023, 0, 0, 100);
+  float temp   = dht.readTemperature();
+  float humid  = dht.readHumidity();
+  bool needsWater = moisture < 30;
+
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Moist:" + String(moisture) + "% T:" + String(temp,0) + "C");
+  lcd.setCursor(0, 1);
+  lcd.print(needsWater ? "⚠ NEEDS WATER!" : "✓ Plant Happy");
+
+  Serial.println("Moisture:" + String(moisture) + "% Temp:" + String(temp,1));
+
+  if (needsWater) {
+    // Blink LED fast
+    for(int i=0;i<3;i++){
+      digitalWrite(LED_PIN,HIGH); delay(150);
+      digitalWrite(LED_PIN,LOW);  delay(150);
+    }
+  } else {
+    digitalWrite(LED_PIN, HIGH);
+    delay(3000);
+    digitalWrite(LED_PIN, LOW);
+  }
+}`,
+    simulate: (state) => {
+      const moist = 20 + 60 * Math.abs(Math.sin(state.t / 35));
+      const temp = 22 + 5 * Math.sin(state.t / 40);
+      const dry = moist < 30;
+      return { ldr: moist, temp: temp.toFixed(1), led: dry, serial: [`Moisture:${moist.toFixed(0)}% Temp:${temp.toFixed(1)}°C${dry ? ' ⚠ NEEDS WATER!' : ' ✓ OK'}`] };
+    },
+    blockDiagram: drawGenericBlock,
+  },
+];
+
+// ─── COMPONENT VISUAL BUILDERS ────────────────────────────────────────────────
+function buildArduino(nodeId) {
+  const el = document.createElement('div');
+  el.className = 'iot-node';
+  el.id = `node-${nodeId}`;
+  el.innerHTML = `
+  <div class="drag-handle" onmousedown="startNodeDrag(event,'${nodeId}')">
+    <div class="drag-dots">${'<div class="drag-dot"></div>'.repeat(6)}</div>
+  </div>
+  <div class="node-body arduino-board" id="body-${nodeId}">
+    <span class="board-label">ARDUINO</span>
+    <span class="board-logo">UNO</span>
+    <div class="ic-chip" style="width:38px;height:48px;left:62px;top:62px;"></div>
+    <div class="crystal" style="left:50px;top:62px;"></div>
+    <div class="usb-port"><div class="usb-inner"></div></div>
+    <div class="reset-btn" style="bottom:24px;right:9px;" title="Reset"></div>
+    <div class="pin-row left" id="pins-left-${nodeId}">
+      ${buildPinHoles(nodeId, ['5V','3.3V','GND','GND','VIN'], 'left')}
+    </div>
+    <div class="pin-row right" id="pins-right-${nodeId}">
+      ${buildPinHoles(nodeId, ['D13','D12','D11','D10','D9','D8','D7','D6','D5','D4','D3','D2'], 'right')}
+    </div>
+    <div style="position:absolute;bottom:24px;left:0;right:0;display:flex;justify-content:center;gap:4px;padding:0 12px;">
+      ${buildPinHolesRow(nodeId, ['A0','A1','A2','A3','A4','A5'])}
+    </div>
+  </div>`;
+  return el;
+}
+
+function buildESP32(nodeId) {
+  const el = document.createElement('div');
+  el.className = 'iot-node';
+  el.id = `node-${nodeId}`;
+  el.innerHTML = `
+  <div class="drag-handle" onmousedown="startNodeDrag(event,'${nodeId}')">
+    <div class="drag-dots">${'<div class="drag-dot"></div>'.repeat(6)}</div>
+  </div>
+  <div class="node-body" id="body-${nodeId}" style="width:95px;height:130px;background:linear-gradient(135deg,#1a1a3a,#252550);border:2px solid #1a1a4a;border-radius:8px;position:relative;box-shadow:var(--shadow-lg);">
+    <div style="position:absolute;top:7px;left:0;right:0;text-align:center;font-size:8px;font-weight:700;color:#aabbff;font-family:var(--font-mono);">ESP32</div>
+    <div style="position:absolute;top:20px;left:12px;right:12px;height:50px;background:linear-gradient(135deg,#2a2a5a,#1a1a3a);border:1px solid #3a3a6a;border-radius:4px;"></div>
+    <div style="position:absolute;top:80px;left:0;right:0;text-align:center;font-size:6px;color:rgba(170,187,255,.5);font-family:var(--font-mono);">WiFi · BT · BLE</div>
+    <!-- Left pins -->
+    <div class="pin-row left" id="pins-left-${nodeId}">
+      ${buildPinHoles(nodeId, ['3V3','GND','GPIO4','GPIO5','GPIO12'], 'left')}
+    </div>
+    <!-- Right pins -->
+    <div class="pin-row right" id="pins-right-${nodeId}">
+      ${buildPinHoles(nodeId, ['GPIO2','GPIO13','GPIO14','GPIO15','GPIO16'], 'right')}
+    </div>
+  </div>`;
+  return el;
+}
+
+function buildPinHoles(nodeId, pins, side) {
+  return pins.map(pin => `
+    <div style="display:flex;align-items:center;gap:3px;${side==='right'?'flex-direction:row-reverse':''}">
+      <div class="pin-hole" id="pin-${nodeId}-${pin}"
+           data-node="${nodeId}" data-pin="${pin}"
+           style="border-color:${pinColor(pin)}"
+           onmousedown="startWire(event,'${nodeId}','${pin}')"
+           title="${pin}">
+      </div>
+      <span style="font-size:5.5px;color:rgba(255,255,255,.4);font-family:var(--font-mono)">${pin}</span>
+    </div>`).join('');
+}
+
+function buildPinHolesRow(nodeId, pins) {
+  return pins.map(pin => `
+    <div style="text-align:center;">
+      <div class="pin-hole" id="pin-${nodeId}-${pin}"
+           data-node="${nodeId}" data-pin="${pin}"
+           style="border-color:${pinColor(pin)}"
+           onmousedown="startWire(event,'${nodeId}','${pin}')"
+           title="${pin}">
+      </div>
+      <div style="font-size:5px;color:rgba(255,255,255,.3);font-family:var(--font-mono);margin-top:1px;">${pin}</div>
+    </div>`).join('');
+}
+
+function buildUltrasonic(nodeId) {
+  const el = document.createElement('div');
+  el.className = 'iot-node';
+  el.id = `node-${nodeId}`;
+  el.innerHTML = `
+  <div class="drag-handle" onmousedown="startNodeDrag(event,'${nodeId}')">
+    <div class="drag-dots">${'<div class="drag-dot"></div>'.repeat(6)}</div>
+  </div>
+  <div class="val-chip" id="val-${nodeId}" style="display:none">-- cm</div>
+  <div class="node-body ultrasonic" id="body-${nodeId}">
+    <div style="position:absolute;top:4px;left:0;right:0;text-align:center;font-size:5.5px;color:rgba(255,255,255,.5);font-family:var(--font-mono);letter-spacing:.15em;">HC-SR04</div>
+    <div class="sonar-eye" style="left:14px;"><div class="sonar-inner"></div></div>
+    <div class="sonar-eye" style="right:14px;"><div class="sonar-inner"></div></div>
+    <div class="sonar-label">ULTRASONIC</div>
+    <div class="sonar-pins">
+      ${['VCC','TRIG','ECHO','GND'].map(pin=>`
+      <div style="text-align:center;">
+        <div style="font-size:5.5px;color:rgba(255,255,255,.4);font-family:var(--font-mono);margin-bottom:2px;">${pin}</div>
+        <div class="sonar-pin pin-hole" id="pin-${nodeId}-${pin}"
+             data-node="${nodeId}" data-pin="${pin}"
+             style="border-color:${pinColor(pin)};border-radius:0;width:5px;height:8px;"
+             onmousedown="startWire(event,'${nodeId}','${pin}')" title="${pin}">
+        </div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+  return el;
+}
+
+function buildDHT22(nodeId) {
+  const el = document.createElement('div');
+  el.className = 'iot-node';
+  el.id = `node-${nodeId}`;
+  el.innerHTML = `
+  <div class="drag-handle" onmousedown="startNodeDrag(event,'${nodeId}')">
+    <div class="drag-dots">${'<div class="drag-dot"></div>'.repeat(6)}</div>
+  </div>
+  <div class="val-chip" id="val-${nodeId}" style="display:none">--°C</div>
+  <div class="node-body" id="body-${nodeId}" style="width:55px;height:65px;background:linear-gradient(135deg,#2a1a0a,#3a2a1a);border:2px solid #3a2a0a;border-radius:7px;position:relative;box-shadow:var(--shadow);">
+    <div style="position:absolute;top:5px;left:0;right:0;text-align:center;font-size:7px;font-weight:700;color:#ffaa44;font-family:var(--font-mono);">DHT22</div>
+    <div style="position:absolute;top:18px;left:6px;right:6px;height:24px;background:#1a0a00;border-radius:3px;border:1px solid #2a1000;"></div>
+    <div style="position:absolute;top:22px;left:8px;display:flex;gap:2px;">
+      ${Array(9).fill(0).map(()=>`<div style="width:2px;height:2px;background:#3a2a00;border-radius:50%;"></div>`).join('')}
+    </div>
+    <div style="position:absolute;bottom:-8px;left:0;right:0;display:flex;justify-content:space-around;padding:0 4px;">
+      ${['VCC','DATA','GND'].map(pin=>`
+      <div style="text-align:center;">
+        <div class="sonar-pin pin-hole" id="pin-${nodeId}-${pin}"
+             data-node="${nodeId}" data-pin="${pin}"
+             style="border-color:${pinColor(pin)};border-radius:0;width:5px;height:8px;"
+             onmousedown="startWire(event,'${nodeId}','${pin}')" title="${pin}">
+        </div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+  return el;
+}
+
+function buildLCD(nodeId) {
+  const el = document.createElement('div');
+  el.className = 'iot-node';
+  el.id = `node-${nodeId}`;
+  el.innerHTML = `
+  <div class="drag-handle" onmousedown="startNodeDrag(event,'${nodeId}')">
+    <div class="drag-dots">${'<div class="drag-dot"></div>'.repeat(6)}</div>
+  </div>
+  <div class="node-body lcd-board" id="body-${nodeId}">
+    <div class="lcd-screen">
+      <div class="lcd-chars" id="lcd-text-${nodeId}">DIST: -- cm   <br>STATUS: IDLE  </div>
+    </div>
+    <div class="lcd-pins">
+      ${['VCC','GND','SDA','SCL'].map(pin=>`
+      <div style="text-align:center;">
+        <div class="pin-hole lcd-pin" id="pin-${nodeId}-${pin}"
+             data-node="${nodeId}" data-pin="${pin}"
+             style="border-color:${pinColor(pin)};width:5px;height:7px;border-radius:1px;"
+             onmousedown="startWire(event,'${nodeId}','${pin}')" title="${pin}">
+        </div>
+        <div style="font-size:4.5px;color:rgba(255,255,255,.3);font-family:var(--font-mono);">${pin}</div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+  return el;
+}
+
+function buildLED(nodeId, color) {
+  const hex = color === 'red' ? '#ef4444' : '#22c55e';
+  const darkHex = color === 'red' ? '#b91c1c' : '#15803d';
+  const borderHex = color === 'red' ? '#991b1b' : '#166534';
+  const el = document.createElement('div');
+  el.className = 'iot-node';
+  el.id = `node-${nodeId}`;
+  el.innerHTML = `
+  <div class="drag-handle" onmousedown="startNodeDrag(event,'${nodeId}')">
+    <div class="drag-dots">${'<div class="drag-dot"></div>'.repeat(4)}</div>
+  </div>
+  <div class="node-body" id="body-${nodeId}" style="width:30px;display:flex;flex-direction:column;align-items:center;padding-top:8px;box-shadow:none;">
+    <div style="font-size:7px;color:var(--text2);font-family:var(--font-mono);margin-bottom:3px;">LED</div>
+    <div id="led-bulb-${nodeId}" style="width:16px;height:18px;border-radius:50% 50% 30% 30%;background:radial-gradient(circle at 35% 30%,${hex}44,${darkHex});border:1.5px solid ${borderHex};position:relative;transition:all .3s;">
+      <div style="position:absolute;inset:0;border-radius:inherit;background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.3),transparent 60%);"></div>
+    </div>
+    <div style="display:flex;gap:6px;margin-top:2px;">
+      <div style="display:flex;flex-direction:column;align-items:center;">
+        <div class="pin-hole" id="pin-${nodeId}-ANODE" data-node="${nodeId}" data-pin="ANODE"
+             style="width:6px;height:6px;border-color:${pinColor('ANODE')}"
+             onmousedown="startWire(event,'${nodeId}','ANODE')" title="Anode (+)"></div>
+        <div style="font-size:5px;color:var(--text3);font-family:var(--font-mono);">+</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;">
+        <div class="pin-hole" id="pin-${nodeId}-CATHODE" data-node="${nodeId}" data-pin="CATHODE"
+             style="width:6px;height:6px;border-color:${pinColor('CATHODE')}"
+             onmousedown="startWire(event,'${nodeId}','CATHODE')" title="Cathode (-)"></div>
+        <div style="font-size:5px;color:var(--text3);font-family:var(--font-mono);">-</div>
+      </div>
+    </div>
+  </div>`;
+  el.dataset.ledColor = hex;
+  return el;
+}
+
+function buildBuzzer(nodeId) {
+  const el = document.createElement('div');
+  el.className = 'iot-node';
+  el.id = `node-${nodeId}`;
+  el.innerHTML = `
+  <div class="drag-handle" onmousedown="startNodeDrag(event,'${nodeId}')">
+    <div class="drag-dots">${'<div class="drag-dot"></div>'.repeat(4)}</div>
+  </div>
+  <div class="node-body" id="body-${nodeId}" style="width:50px;display:flex;flex-direction:column;align-items:center;padding-top:8px;box-shadow:none;">
+    <div style="font-size:7px;color:var(--text2);font-family:var(--font-mono);margin-bottom:4px;">BUZZER</div>
+    <div id="buz-body-${nodeId}" style="width:34px;height:34px;border-radius:50%;background:radial-gradient(circle,#333,#111);border:3px solid #555;position:relative;transition:all .3s;">
+      <div style="position:absolute;inset:6px;border-radius:50%;background:#222;border:1px solid #444;"></div>
+      <div style="position:absolute;inset:13px;border-radius:50%;background:#111;border:1px solid #333;"></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:4px;">
+      <div style="text-align:center;">
+        <div class="pin-hole" id="pin-${nodeId}-ANODE" data-node="${nodeId}" data-pin="ANODE"
+             style="width:6px;height:6px;border-color:#f97316"
+             onmousedown="startWire(event,'${nodeId}','ANODE')" title="Signal (+)"></div>
+        <div style="font-size:5px;color:var(--text3);font-family:var(--font-mono);">+</div>
+      </div>
+      <div style="text-align:center;">
+        <div class="pin-hole" id="pin-${nodeId}-CATHODE" data-node="${nodeId}" data-pin="CATHODE"
+             style="width:6px;height:6px;border-color:#475569"
+             onmousedown="startWire(event,'${nodeId}','CATHODE')" title="GND (-)"></div>
+        <div style="font-size:5px;color:var(--text3);font-family:var(--font-mono);">-</div>
+      </div>
+    </div>
+  </div>`;
+  return el;
+}
+
+function buildLDR(nodeId) {
+  const el = document.createElement('div');
+  el.className = 'iot-node';
+  el.id = `node-${nodeId}`;
+  el.innerHTML = `
+  <div class="drag-handle" onmousedown="startNodeDrag(event,'${nodeId}')">
+    <div class="drag-dots">${'<div class="drag-dot"></div>'.repeat(4)}</div>
+  </div>
+  <div class="val-chip" id="val-${nodeId}" style="display:none">-- lux</div>
+  <div class="node-body" id="body-${nodeId}" style="width:42px;height:50px;background:#f8e4a0;border:2px solid #c8a040;border-radius:8px;position:relative;box-shadow:var(--shadow);">
+    <div style="position:absolute;top:5px;left:0;right:0;text-align:center;font-size:7px;font-weight:700;color:#8B6914;font-family:var(--font-mono);">LDR</div>
+    <div style="position:absolute;top:18px;left:8px;right:8px;height:18px;background:#c8a040;border-radius:50%;border:1px solid #a07028;"></div>
+    <div style="position:absolute;bottom:-8px;left:0;right:0;display:flex;justify-content:space-around;">
+      ${['VCC','OUT','GND'].map(pin=>`
+      <div style="text-align:center;">
+        <div class="sonar-pin pin-hole" id="pin-${nodeId}-${pin}"
+             data-node="${nodeId}" data-pin="${pin}"
+             style="border-color:${pinColor(pin)};border-radius:0;width:5px;height:8px;background:#c8a020;"
+             onmousedown="startWire(event,'${nodeId}','${pin}')" title="${pin}">
+        </div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+  return el;
+}
+
+function buildPIR(nodeId) {
+  const el = document.createElement('div');
+  el.className = 'iot-node';
+  el.id = `node-${nodeId}`;
+  el.innerHTML = `
+  <div class="drag-handle" onmousedown="startNodeDrag(event,'${nodeId}')">
+    <div class="drag-dots">${'<div class="drag-dot"></div>'.repeat(4)}</div>
+  </div>
+  <div class="node-body" id="body-${nodeId}" style="width:55px;height:60px;background:linear-gradient(135deg,#2a0a2a,#3a1a3a);border:2px solid #4a2a4a;border-radius:8px;position:relative;box-shadow:var(--shadow);">
+    <div style="position:absolute;top:5px;left:0;right:0;text-align:center;font-size:7px;font-weight:700;color:#ff88ff;font-family:var(--font-mono);">PIR</div>
+    <div style="position:absolute;top:16px;left:50%;transform:translateX(-50%);width:24px;height:24px;border-radius:50%;background:radial-gradient(circle,#aa66aa,#662266);border:2px solid #884488;"></div>
+    <div style="position:absolute;bottom:-8px;left:0;right:0;display:flex;justify-content:space-around;">
+      ${['VCC','OUT','GND'].map(pin=>`
+      <div style="text-align:center;">
+        <div class="sonar-pin pin-hole" id="pin-${nodeId}-${pin}"
+             data-node="${nodeId}" data-pin="${pin}"
+             style="border-color:${pinColor(pin)};border-radius:0;width:5px;height:8px;"
+             onmousedown="startWire(event,'${nodeId}','${pin}')" title="${pin}">
+        </div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+  return el;
+}
+
+function buildServo(nodeId) {
+  const el = document.createElement('div');
+  el.className = 'iot-node';
+  el.id = `node-${nodeId}`;
+  el.innerHTML = `
+  <div class="drag-handle" onmousedown="startNodeDrag(event,'${nodeId}')">
+    <div class="drag-dots">${'<div class="drag-dot"></div>'.repeat(6)}</div>
+  </div>
+  <div class="val-chip" id="val-${nodeId}" style="display:none">0°</div>
+  <div class="node-body" id="body-${nodeId}" style="width:68px;height:50px;background:linear-gradient(135deg,#2a3a4a,#1a2a3a);border:2px solid #1a2a3a;border-radius:8px;position:relative;box-shadow:var(--shadow);">
+    <div style="position:absolute;top:5px;left:0;right:0;text-align:center;font-size:7px;font-weight:700;color:#88aaff;font-family:var(--font-mono);">SG90 SERVO</div>
+    <div style="position:absolute;top:16px;left:50%;transform:translateX(-50%);width:20px;height:20px;border-radius:50%;background:radial-gradient(circle,#4a5a7a,#2a3a5a);border:2px solid #6a7a9a;"></div>
+    <div style="position:absolute;bottom:-8px;left:0;right:0;display:flex;justify-content:space-around;">
+      ${['VCC','GND','SIGNAL'].map(pin=>`
+      <div style="text-align:center;">
+        <div class="sonar-pin pin-hole" id="pin-${nodeId}-${pin}"
+             data-node="${nodeId}" data-pin="${pin}"
+             style="border-color:${pinColor(pin)};border-radius:0;width:5px;height:8px;"
+             onmousedown="startWire(event,'${nodeId}','${pin}')" title="${pin}">
+        </div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+  return el;
+}
+
+function buildRelay(nodeId) {
+  const el = document.createElement('div');
+  el.className = 'iot-node';
+  el.id = `node-${nodeId}`;
+  el.innerHTML = `
+  <div class="drag-handle" onmousedown="startNodeDrag(event,'${nodeId}')">
+    <div class="drag-dots">${'<div class="drag-dot"></div>'.repeat(6)}</div>
+  </div>
+  <div class="node-body" id="body-${nodeId}" style="width:78px;height:52px;background:linear-gradient(135deg,#2a1a1a,#3a1a1a);border:2px solid #5a2a2a;border-radius:8px;position:relative;box-shadow:var(--shadow);">
+    <div style="position:absolute;top:5px;left:0;right:0;text-align:center;font-size:7px;font-weight:700;color:#ff8888;font-family:var(--font-mono);">RELAY 5V</div>
+    <div style="position:absolute;top:16px;left:8px;width:28px;height:20px;background:linear-gradient(#2a2a4a,#1a1a3a);border:1px solid #3a3a6a;border-radius:2px;"></div>
+    <div style="position:absolute;top:18px;right:8px;width:16px;height:16px;border-radius:50%;background:radial-gradient(circle,#446644,#224422);border:1px solid #336633;"></div>
+    <div style="position:absolute;bottom:-8px;left:0;right:0;display:flex;justify-content:space-around;">
+      ${['VCC','GND','IN'].map(pin=>`
+      <div style="text-align:center;">
+        <div class="sonar-pin pin-hole" id="pin-${nodeId}-${pin}"
+             data-node="${nodeId}" data-pin="${pin}"
+             style="border-color:${pinColor(pin)};border-radius:0;width:5px;height:8px;"
+             onmousedown="startWire(event,'${nodeId}','${pin}')" title="${pin}">
+        </div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+  return el;
+}
+
+function pinColor(pin) {
+  if (pin === 'VCC' || pin === '5V' || pin === '3.3V' || pin === '3V3') return '#ef4444';
+  if (pin === 'GND') return '#475569';
+  if (pin === 'TRIG') return '#eab308';
+  if (pin === 'ECHO') return '#3b82f6';
+  if (pin === 'DATA') return '#eab308';
+  if (pin === 'ANODE' || pin === 'SIGNAL' || pin === 'IN') return '#f97316';
+  if (pin === 'OUT') return '#eab308';
+  if (pin.startsWith('D') || pin.startsWith('A') || pin.startsWith('GPIO')) return '#3b82f6';
+  return '#64748b';
+}
+
+// ─── DROP / DRAG ──────────────────────────────────────────────────────────────
+function startDrag(e, type) { draggingComp = type; }
+document.getElementById('canvas-wrap').addEventListener('dragover', e => e.preventDefault());
+document.getElementById('canvas-wrap').addEventListener('drop', dropComp);
+
+function dropComp(e) {
+  e.preventDefault();
+  if (!draggingComp) return;
+  const rect = document.getElementById('canvas-wrap').getBoundingClientRect();
+  addNode(draggingComp, e.clientX - rect.left, e.clientY - rect.top);
+  draggingComp = null;
+  document.getElementById('canvas-hint').style.display = 'none';
+}
+
+function addNode(type, x, y, id) {
+  const nodeId = id || `n${++nodeIdCounter}`;
+  let el;
+  const colorVariant = type === 'led_red' ? 'red' : 'green';
+
+  if (type === 'arduino')    el = buildArduino(nodeId);
+  else if (type === 'esp32') el = buildESP32(nodeId);
+  else if (type === 'ultrasonic') el = buildUltrasonic(nodeId);
+  else if (type === 'dht22') el = buildDHT22(nodeId);
+  else if (type === 'lcd')   el = buildLCD(nodeId);
+  else if (type === 'led_red' || type === 'led_green') el = buildLED(nodeId, colorVariant);
+  else if (type === 'buzzer') el = buildBuzzer(nodeId);
+  else if (type === 'ldr')   el = buildLDR(nodeId);
+  else if (type === 'pir')   el = buildPIR(nodeId);
+  else if (type === 'servo') el = buildServo(nodeId);
+  else if (type === 'relay') el = buildRelay(nodeId);
+  else return;
+
+  el.style.left = (x - 80) + 'px';
+  el.style.top  = (y - 40) + 'px';
+  el.dataset.type = type;
+  document.getElementById('nodes-layer').appendChild(el);
+  nodes.push({id: nodeId, type, x, y, el});
+  el.addEventListener('mouseup', e => { if (wiringFrom) completeWire(e); });
+  return nodeId;
+}
+
+// ─── NODE DRAG ────────────────────────────────────────────────────────────────
+function startNodeDrag(e, nodeId) {
+  e.stopPropagation();
+  if (wiringFrom) return;
+  const el = document.getElementById(`node-${nodeId}`);
+  const startX = e.clientX - el.offsetLeft;
+  const startY = e.clientY - el.offsetTop;
+  el.classList.add('dragging');
+  const onMove = (ev) => {
+    el.style.left = (ev.clientX - startX) + 'px';
+    el.style.top  = (ev.clientY - startY) + 'px';
+    const n = nodes.find(n => n.id === nodeId);
+    if (n) { n.x = ev.clientX - startX + 80; n.y = ev.clientY - startY + 40; }
+    redrawWires();
+  };
+  const onUp = () => {
+    el.classList.remove('dragging');
+    window.removeEventListener('mousemove', onMove);
+    window.removeEventListener('mouseup', onUp);
+  };
+  window.addEventListener('mousemove', onMove);
+  window.addEventListener('mouseup', onUp);
+}
+
+// ─── WIRING ───────────────────────────────────────────────────────────────────
+let tempWireLine = null;
+
+function startWire(e, nodeId, pinId) {
+  e.stopPropagation();
+  if (wiringFrom) {
+    if (wiringFrom.nodeId !== nodeId) {
+      const wireColor = wiringFrom.pinId === 'VCC' || wiringFrom.pinId === '5V' || wiringFrom.pinId === '3V3' ? '#ef4444'
+        : wiringFrom.pinId === 'GND' ? '#475569'
+        : wiringFrom.pinId === 'TRIG' ? '#eab308'
+        : wiringFrom.pinId === 'ECHO' ? '#3b82f6'
+        : wiringFrom.pinId === 'ANODE' ? '#f97316'
+        : '#22c55e';
+      addWire(wiringFrom.nodeId, wiringFrom.pinId, nodeId, pinId, wireColor);
+      logConsole(`Wire: ${wiringFrom.nodeId}[${wiringFrom.pinId}] → ${nodeId}[${pinId}]`, 'ok');
+    }
+    cancelWiring();
+    return;
+  }
+  const pinEl = document.getElementById(`pin-${nodeId}-${pinId}`);
+  if (!pinEl) return;
+  const rect = pinEl.getBoundingClientRect();
+  const canvasRect = document.getElementById('canvas-wrap').getBoundingClientRect();
+  const x = rect.left - canvasRect.left + rect.width / 2;
+  const y = rect.top - canvasRect.top + rect.height / 2;
+  const wColor = pinId === 'VCC' || pinId === '5V' || pinId === '3V3' ? '#ef4444'
+    : pinId === 'GND' ? '#475569'
+    : pinId === 'TRIG' ? '#eab308'
+    : pinId === 'ECHO' ? '#3b82f6'
+    : pinId === 'ANODE' ? '#f97316'
+    : '#22c55e';
+  wiringFrom = {nodeId, pinId, x, y, color: wColor};
+  pinEl.style.boxShadow = `0 0 8px ${wColor}`;
+  document.getElementById('canvas-wrap').style.cursor = 'crosshair';
+  document.getElementById('canvas-wrap').addEventListener('mousemove', drawTempWire);
+}
+
+function drawTempWire(e) {
+  if (!wiringFrom) return;
+  const svg = document.getElementById('wire-svg');
+  const canvasRect = document.getElementById('canvas-wrap').getBoundingClientRect();
+  const mx = e.clientX - canvasRect.left;
+  const my = e.clientY - canvasRect.top;
+  let tmp = document.getElementById('temp-wire');
+  if (!tmp) {
+    tmp = document.createElementNS('http://www.w3.org/2000/svg','path');
+    tmp.id = 'temp-wire';
+    tmp.setAttribute('fill','none');
+    tmp.setAttribute('stroke-width','2.5');
+    tmp.setAttribute('stroke-linecap','round');
+    tmp.setAttribute('opacity','0.6');
+    svg.appendChild(tmp);
+  }
+  const {x: sx, y: sy, color} = wiringFrom;
+  tmp.setAttribute('d', calcWirePath(sx, sy, mx, my));
+  tmp.setAttribute('stroke', color);
+  tmp.setAttribute('stroke-dasharray', '6 4');
+}
+
+function cancelWiring() {
+  if (wiringFrom) {
+    const pinEl = document.getElementById(`pin-${wiringFrom.nodeId}-${wiringFrom.pinId}`);
+    if (pinEl) pinEl.style.boxShadow = '';
+  }
+  wiringFrom = null;
+  document.getElementById('canvas-wrap').style.cursor = 'default';
+  document.getElementById('canvas-wrap').removeEventListener('mousemove', drawTempWire);
+  const tmp = document.getElementById('temp-wire');
+  if (tmp) tmp.remove();
+}
+
+function completeWire(e) { /* handled in startWire */ }
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') cancelWiring(); });
+document.getElementById('canvas-wrap').addEventListener('click', e => {
+  if (e.target === document.getElementById('canvas-wrap') || e.target === document.getElementById('canvas-bg')) cancelWiring();
+});
+
+function getPinCenter(nodeId, pinId) {
+  const pinEl = document.getElementById(`pin-${nodeId}-${pinId}`);
+  if (!pinEl) return null;
+  const pinRect = pinEl.getBoundingClientRect();
+  const canvasRect = document.getElementById('canvas-wrap').getBoundingClientRect();
+  return { x: pinRect.left - canvasRect.left + pinRect.width / 2, y: pinRect.top - canvasRect.top + pinRect.height / 2 };
+}
+
+function calcWirePath(x1, y1, x2, y2) {
+  const dx = x2 - x1, dy = y2 - y1;
+  const cx1 = x1 + dx * 0.4, cy1 = y1 + dy * 0.1 + Math.sign(dy) * 22;
+  const cx2 = x2 - dx * 0.4, cy2 = y2 - dy * 0.1 - Math.sign(dy) * 22;
+  return `M ${x1} ${y1} C ${cx1} ${cy1}, ${cx2} ${cy2}, ${x2} ${y2}`;
+}
+
+function addWire(fromNode, fromPin, toNode, toPin, color) {
+  wires.push({id: `w${Date.now()}`, fromNode, fromPin, toNode, toPin, color, active: false});
+  redrawWires();
+  markPinConnected(fromNode, fromPin, color);
+  markPinConnected(toNode, toPin, color);
+}
+
+function markPinConnected(nodeId, pinId, color) {
+  const el = document.getElementById(`pin-${nodeId}-${pinId}`);
+  if (el) { el.classList.add('connected'); el.style.borderColor = color; el.style.background = color + '44'; }
+}
+
+function redrawWires() {
+  const svg = document.getElementById('wire-svg');
+  svg.querySelectorAll('.wire-path').forEach(p => p.remove());
+  wires.forEach(wire => {
+    const from = getPinCenter(wire.fromNode, wire.fromPin);
+    const to   = getPinCenter(wire.toNode, wire.toPin);
+    if (!from || !to) return;
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.classList.add('wire-path');
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke', wire.active ? wire.color : wire.color + 'cc');
+    path.setAttribute('stroke-width', wire.active ? '3' : '2.5');
+    path.setAttribute('stroke-linecap', 'round');
+    path.setAttribute('d', calcWirePath(from.x, from.y, to.x, to.y));
+    if (wire.active) {
+      path.setAttribute('filter', `drop-shadow(0 0 3px ${wire.color})`);
+      path.style.animation = 'data-flow .8s linear infinite';
+      path.setAttribute('stroke-dasharray', '8 4');
+    }
+    svg.insertBefore(path, svg.firstChild);
+  });
+}
+
+// ─── SIMULATION ───────────────────────────────────────────────────────────────
+function toggleSim() { if (simRunning) stopSim(); else startSim(); }
+
+function startSim() {
+  if (!currentModule) { logConsole('No module loaded. Load a module first.','warn'); return; }
+  simRunning = true;
+  document.getElementById('sim-dot').classList.add('live');
+  document.getElementById('sim-label').className = 'sim-label live';
+  document.getElementById('sim-label').textContent = 'LIVE';
+  document.getElementById('run-btn').className = 'ctrl-btn btn-stop';
+  document.getElementById('run-btn').textContent = '⏸ Pause';
+  logConsole('Simulation started.','ok');
+  simInterval = setInterval(simTick, 800);
+}
+
+function stopSim() {
+  simRunning = false;
+  clearInterval(simInterval);
+  document.getElementById('sim-dot').classList.remove('live');
+  document.getElementById('sim-label').className = 'sim-label off';
+  document.getElementById('sim-label').textContent = 'PAUSED';
+  document.getElementById('run-btn').className = 'ctrl-btn btn-run';
+  document.getElementById('run-btn').textContent = '▶ Run';
+  logConsole('Simulation paused.','info');
+  wires.forEach(w => { w.active = false; });
+  redrawWires();
+}
+
+function simTick() {
+  if (!currentModule?.simulate) return;
+  simState.t++;
+  const result = currentModule.simulate(simState);
+
+  nodes.forEach(node => {
+    const val = document.getElementById(`val-${node.id}`);
+    if (node.type === 'ultrasonic' && result.dist) {
+      if (val) { val.style.display = 'block'; val.textContent = result.dist + ' cm'; }
+    }
+    if (node.type === 'dht22' && result.temp) {
+      if (val) { val.style.display = 'block'; val.textContent = result.temp + '°C'; }
+    }
+    if (node.type === 'ldr' && result.ldr) {
+      if (val) { val.style.display = 'block'; val.textContent = result.ldr + ' lux'; }
+    }
+    if (node.type === 'servo' && result.servo !== undefined) {
+      if (val) { val.style.display = 'block'; val.textContent = result.servo + '°'; }
+    }
+    if ((node.type === 'led_red' || node.type === 'led_green') && result.led !== undefined) {
+      const bulb = document.getElementById(`led-bulb-${node.id}`);
+      if (bulb) {
+        const c = node.el.dataset.ledColor || '#ef4444';
+        bulb.style.background = result.led ? `radial-gradient(circle at 35% 30%, ${c}, ${c}aa)` : `radial-gradient(circle at 35% 30%, ${c}44, ${c}22)`;
+        bulb.style.boxShadow = result.led ? `0 0 16px ${c}, 0 0 32px ${c}44` : 'none';
+      }
+    }
+    if (node.type === 'buzzer' && result.buzzer !== undefined) {
+      const buz = document.getElementById(`buz-body-${node.id}`);
+      if (buz) buz.style.boxShadow = result.buzzer ? '0 0 12px #8b5cf6, 0 0 24px #8b5cf644' : 'none';
+    }
+    if (node.type === 'lcd') {
+      const lcdTxt = document.getElementById(`lcd-text-${node.id}`);
+      if (lcdTxt) {
+        if (result.dist) lcdTxt.innerHTML = `DIST:${result.dist.padStart(6)}cm<br>STAT:${result.led?'ALERT   ':'NORMAL  '}`;
+        if (result.temp) lcdTxt.innerHTML = `TEMP:${result.temp.padStart(5)}C<br>HUMD:${(result.humid||'--').toString().padStart(4)}%  `;
+        if (result.servo !== undefined) lcdTxt.innerHTML = `Servo:${String(result.servo).padStart(4)}deg<br>PWM: ACTIVE    `;
+      }
+    }
+  });
+
+  wires.forEach(w => { w.active = true; });
+  redrawWires();
+
+  if (result.serial) {
+    const t = String(simState.t).padStart(4,'0');
+    result.serial.forEach(line => {
+      const type = line.includes('ALERT') || line.includes('ERR') || line.includes('🚨') || line.includes('⚠') ? 'warn'
+                 : line.includes('OK') || line.includes('✅') || line.includes('✓') ? 'ok' : 'data';
+      logConsole(`[${t}] ${line}`, type);
+    });
+  }
+}
+
+// ─── UPLOAD ───────────────────────────────────────────────────────────────────
+function uploadCode() {
+  if (!currentModule) { logConsole('No module loaded.','warn'); return; }
+  switchRTab('code');
+  const steps = [
+    {msg:'Connecting to board...', type:'info', delay:300},
+    {msg:'Compiling sketch...', type:'info', delay:900},
+    {msg:'Binary size: 5,204 bytes (16%)', type:'data', delay:600},
+    {msg:'Uploading...', type:'info', delay:400},
+    {msg:'████████████████████ 100%', type:'data', delay:1200},
+    {msg:'Upload complete. Board resetting...', type:'ok', delay:400},
+    {msg:'=== Serial Monitor ===', type:'info', delay:500},
+    {msg:`=== ${currentModule.title} Ready ===`, type:'ok', delay:300},
+  ];
+  clearConsole();
+  let total = 0;
+  steps.forEach(step => { total += step.delay; setTimeout(() => logConsole(step.msg, step.type), total); });
+  setTimeout(() => { logConsole('Simulation auto-started.','ok'); if (!simRunning) startSim(); }, total + 300);
+}
+
+// ─── LOAD MODULE ──────────────────────────────────────────────────────────────
+function loadModule(moduleId) {
+  clearCanvas(true);
+  const mod = MODULES.find(m => m.id === moduleId);
+  if (!mod) return;
+  currentModule = mod;
+  currentStep = 0;
+  mod.components.forEach(comp => addNode(comp.type, comp.x, comp.y, comp.id));
+  setTimeout(() => {
+    mod.wires.forEach(w => addWire(w.from, w.fromPin, w.to, w.toPin, w.color));
+    document.getElementById('canvas-hint').style.display = 'none';
+  }, 80);
+  document.getElementById('code-editor').value = mod.code || '// No code for this module.';
+  renderGuide();
+  switchMainTab('lab');
+  document.querySelectorAll('.mod-card').forEach(c => c.classList.remove('active'));
+  const mc = document.getElementById(`modcard-${moduleId}`);
+  if (mc) mc.classList.add('active');
+  logConsole(`Module loaded: ${mod.title}`, 'ok');
+}
+
+function renderGuide() {
+  const mod = currentModule;
+  if (!mod) return;
+  const body = document.getElementById('guide-body');
+  const steps = mod.steps || [];
+  const pct = steps.length ? Math.round((currentStep + 1) / steps.length * 100) : 0;
+  const step = steps[currentStep] || {};
+
+  body.innerHTML = `
+  <div style="padding:14px;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+      <span style="font-size:18px;">${mod.icon || '⚡'}</span>
+      <div>
+        <div style="font-size:12px;font-weight:800;color:var(--text);">${mod.title}</div>
+        <div style="font-size:10px;color:var(--text3);">${mod.difficulty} · ${mod.topic}</div>
+      </div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-label"><span>Step ${currentStep+1} of ${steps.length}</span><span>${pct}%</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    </div>
+    
+    <div class="step-card">
+      <div class="step-badge">Step ${currentStep+1}</div>
+      <div class="step-title">${step.title||''}</div>
+      <div class="step-body">${step.body||''}</div>
+      ${step.wires && step.wires.length ? `
+      <div style="margin-top:10px;padding-top:8px;border-top:1px solid #bfdbfe;">
+        <div style="font-size:9px;color:var(--accent);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;">Wires this step</div>
+        ${step.wires.map(w=>`<div class="wire-legend"><div class="wire-dot" style="background:${w}"></div><span>${wireColorName(w)}</span></div>`).join('')}
+      </div>` : ''}
+    </div>
+
+    <div class="step-nav">
+      <button class="snav-btn snav-prev" onclick="changeStep(-1)" ${currentStep===0?'disabled':''}>← Prev</button>
+      <button class="snav-btn snav-next" onclick="changeStep(1)" ${currentStep===steps.length-1?'disabled':''}>Next →</button>
+    </div>
+
+    <div style="margin-top:16px;">
+      <div style="font-size:9px;color:var(--text3);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">All Steps</div>
+      ${steps.map((s,i)=>`
+      <div onclick="jumpStep(${i})" class="step-list-item${i===currentStep?' active-step':''}">
+        <div class="step-num-circle${i<currentStep?' done':i===currentStep?' current':''}">${i<currentStep?'✓':i+1}</div>
+        <span class="step-list-label${i===currentStep?' current':i<currentStep?' done':''}">${s.title}</span>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function changeStep(dir) {
+  if (!currentModule) return;
+  currentStep = Math.max(0, Math.min(currentModule.steps.length - 1, currentStep + dir));
+  renderGuide();
+  highlightStepWires();
+}
+function jumpStep(i) { currentStep = i; renderGuide(); highlightStepWires(); }
+
+function highlightStepWires() {
+  if (!currentModule) return;
+  const step = currentModule.steps[currentStep];
+  if (!step) return;
+  wires.forEach(w => { w.active = step.wires && step.wires.includes(w.color); });
+  redrawWires();
+}
+
+function wireColorName(c) {
+  const map = {
+    '#ef4444':'Red — Power (5V)',
+    '#475569':'Black — Ground (GND)',
+    '#eab308':'Yellow — Signal/Data',
+    '#3b82f6':'Blue — ECHO/SDA',
+    '#f97316':'Orange — Digital Output',
+    '#22c55e':'Green — Data Signal',
+    '#8b5cf6':'Purple — Control Signal',
+  };
+  return map[c] || c;
+}
+
+// ─── BLOCK DIAGRAMS ───────────────────────────────────────────────────────────
+function drawUltrasonicBlock(svg) {
+  svg.innerHTML = `
+  <defs>
+    <marker id="ba" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="700" height="440" fill="#fff" rx="16"/>
+  <text x="350" y="30" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif" font-size="15" font-weight="800" fill="#1e293b" letter-spacing="1">ULTRASONIC DISTANCE METER — BLOCK DIAGRAM</text>
+
+  <!-- HC-SR04 -->
+  <rect x="40" y="60" width="130" height="90" rx="10" fill="#eff6ff" stroke="#bfdbfe" stroke-width="2"/>
+  <text x="105" y="88" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif" font-size="13" font-weight="800" fill="#2563eb">HC-SR04</text>
+  <text x="105" y="104" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif" font-size="9" fill="#64748b">Ultrasonic Sensor</text>
+  <circle cx="170" cy="82"  r="5" fill="#ef4444"/>  <text x="178" y="86"  font-size="8" fill="#ef4444" font-family="monospace" font-weight="700">VCC</text>
+  <circle cx="170" cy="98"  r="5" fill="#eab308"/>  <text x="178" y="102" font-size="8" fill="#eab308" font-family="monospace" font-weight="700">TRIG</text>
+  <circle cx="170" cy="114" r="5" fill="#3b82f6"/>  <text x="178" y="118" font-size="8" fill="#3b82f6" font-family="monospace" font-weight="700">ECHO</text>
+  <circle cx="170" cy="130" r="5" fill="#475569"/> <text x="178" y="134" font-size="8" fill="#475569" font-family="monospace" font-weight="700">GND</text>
+
+  <!-- Arduino -->
+  <rect x="270" y="50" width="160" height="130" rx="10" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="2"/>
+  <text x="350" y="82" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif" font-size="14" font-weight="800" fill="#16a34a">ARDUINO UNO</text>
+  <text x="350" y="99" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif" font-size="9" fill="#64748b">ATmega328P • 16MHz</text>
+  <circle cx="270" cy="112" r="5" fill="#ef4444"/>  <text x="248" y="116" text-anchor="end" font-size="8" fill="#ef4444" font-family="monospace" font-weight="700">5V</text>
+  <circle cx="270" cy="128" r="5" fill="#eab308"/> <text x="248" y="132" text-anchor="end" font-size="8" fill="#eab308" font-family="monospace" font-weight="700">D9</text>
+  <circle cx="270" cy="144" r="5" fill="#3b82f6"/> <text x="248" y="148" text-anchor="end" font-size="8" fill="#3b82f6" font-family="monospace" font-weight="700">D10</text>
+  <circle cx="270" cy="160" r="5" fill="#475569"/> <text x="248" y="164" text-anchor="end" font-size="8" fill="#475569" font-family="monospace" font-weight="700">GND</text>
+  <circle cx="430" cy="128" r="5" fill="#f97316"/> <text x="438" y="132" font-size="8" fill="#f97316" font-family="monospace" font-weight="700">D13</text>
+  <circle cx="430" cy="144" r="5" fill="#475569"/> <text x="438" y="148" font-size="8" fill="#475569" font-family="monospace" font-weight="700">GND</text>
+
+  <!-- LED -->
+  <rect x="500" y="100" width="90" height="70" rx="10" fill="#fff7ed" stroke="#fed7aa" stroke-width="2"/>
+  <text x="545" y="128" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif" font-size="13" font-weight="800" fill="#ea580c">LED</text>
+  <text x="545" y="144" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif" font-size="9" fill="#64748b">Alert Indicator</text>
+  <circle cx="500" cy="124" r="5" fill="#f97316"/>
+  <circle cx="500" cy="140" r="5" fill="#475569"/>
+
+  <!-- Wires -->
+  <line x1="170" y1="82" x2="270" y2="112" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round" marker-end="url(#ba)" opacity=".9"/>
+  <line x1="170" y1="98" x2="270" y2="128" stroke="#eab308" stroke-width="2.5" stroke-linecap="round" marker-end="url(#ba)" opacity=".9"/>
+  <line x1="170" y1="114" x2="270" y2="144" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" marker-end="url(#ba)" opacity=".9"/>
+  <line x1="170" y1="130" x2="270" y2="160" stroke="#475569" stroke-width="2.5" stroke-linecap="round" opacity=".7"/>
+  <line x1="430" y1="128" x2="500" y2="124" stroke="#f97316" stroke-width="2.5" stroke-linecap="round" marker-end="url(#ba)" opacity=".9"/>
+  <line x1="430" y1="144" x2="500" y2="140" stroke="#475569" stroke-width="2.5" stroke-linecap="round" opacity=".7"/>
+
+  <!-- Logic Box -->
+  <rect x="40" y="250" width="610" height="160" rx="12" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5"/>
+  <text x="345" y="274" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif" font-size="11" font-weight="700" fill="#64748b" letter-spacing="2">PROGRAM LOGIC FLOW</text>
+
+  <rect x="60" y="284" width="120" height="44" rx="8" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5"/>
+  <text x="120" y="302" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#2563eb">pulseIn(ECHO)</text>
+  <text x="120" y="316" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#64748b">→ duration µs</text>
+
+  <line x1="180" y1="306" x2="214" y2="306" stroke="#2563eb" stroke-width="1.5" marker-end="url(#ba)"/>
+
+  <rect x="214" y="284" width="130" height="44" rx="8" fill="#fffbeb" stroke="#fde68a" stroke-width="1.5"/>
+  <text x="279" y="302" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#d97706">dist = duration</text>
+  <text x="279" y="316" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#d97706">× 0.0343 / 2</text>
+
+  <line x1="344" y1="306" x2="374" y2="306" stroke="#2563eb" stroke-width="1.5" marker-end="url(#ba)"/>
+
+  <rect x="374" y="284" width="120" height="44" rx="8" fill="#fff7ed" stroke="#fed7aa" stroke-width="1.5"/>
+  <text x="434" y="302" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#ea580c">if dist &lt; 20cm</text>
+  <text x="434" y="316" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#ea580c">LED = HIGH ⚠</text>
+
+  <line x1="494" y1="306" x2="524" y2="306" stroke="#2563eb" stroke-width="1.5" marker-end="url(#ba)"/>
+
+  <rect x="524" y="284" width="110" height="44" rx="8" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.5"/>
+  <text x="579" y="302" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#16a34a">Serial.print</text>
+  <text x="579" y="316" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#16a34a">(distance)</text>
+
+  <!-- Legend -->
+  <text x="60" y="356" font-family="Plus Jakarta Sans,sans-serif" font-size="10" font-weight="700" fill="#64748b">WIRE LEGEND:</text>
+  <circle cx="152" cy="353" r="5" fill="#ef4444"/> <text x="160" y="357" font-size="9" fill="#1e293b" font-family="monospace">Red = 5V Power</text>
+  <circle cx="258" cy="353" r="5" fill="#475569"/> <text x="266" y="357" font-size="9" fill="#1e293b" font-family="monospace">Black = GND</text>
+  <circle cx="340" cy="353" r="5" fill="#eab308"/> <text x="348" y="357" font-size="9" fill="#1e293b" font-family="monospace">Yellow = TRIG</text>
+  <circle cx="430" cy="353" r="5" fill="#3b82f6"/> <text x="438" y="357" font-size="9" fill="#1e293b" font-family="monospace">Blue = ECHO</text>
+  <circle cx="518" cy="353" r="5" fill="#f97316"/> <text x="526" y="357" font-size="9" fill="#1e293b" font-family="monospace">Orange = Output</text>
+  <text x="350" y="395" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif" font-size="11" fill="#94a3b8">Click outside to close</text>`;
+}
+
+function drawGenericBlock(svg) {
+  if (!currentModule) return;
+  const mod = currentModule;
+  svg.innerHTML = `
+  <rect x="0" y="0" width="700" height="440" fill="#fff" rx="16"/>
+  <text x="350" y="30" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif" font-size="15" font-weight="800" fill="#1e293b">${mod.title.toUpperCase()} — BLOCK DIAGRAM</text>
+  <text x="350" y="50" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif" font-size="11" fill="#64748b">${mod.desc}</text>
+  <text x="350" y="230" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif" font-size="14" fill="#94a3b8">Load the module and view the circuit in the lab!</text>
+  <text x="350" y="260" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif" font-size="11" fill="#94a3b8">Check the Code tab for the full Arduino sketch.</text>
+  <text x="350" y="400" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif" font-size="11" fill="#94a3b8">Click outside to close</text>`;
+}
+
+function showBlockDiagram() {
+  const overlay = document.getElementById('block-overlay');
+  const svg = document.getElementById('block-svg');
+  if (currentModule?.blockDiagram) currentModule.blockDiagram(svg);
+  else svg.innerHTML = `<rect x="0" y="0" width="700" height="440" fill="#fff" rx="16"/><text x="350" y="220" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif" font-size="14" fill="#64748b">Load a module to view its block diagram</text>`;
+  overlay.classList.add('show');
+}
+
+function hideBlockDiagram(e) {
+  if (e.target === document.getElementById('block-overlay')) document.getElementById('block-overlay').classList.remove('show');
+}
+
+// ─── AI (GROQ) ────────────────────────────────────────────────────────────────
+async function sendAI() {
+  const input = document.getElementById('ai-input');
+  const txt = input.value.trim();
+  if (!txt) return;
+  input.value = '';
+  appendAIMsg(txt, 'user');
+  const thinking = appendThinking();
+  const systemPrompt = `You are an expert IoT and Arduino educator assistant in a Virtual IoT Lab.
+${currentModule ? `Active module: "${currentModule.title}". ${currentModule.desc}` : 'No module loaded yet.'}
+Active components: ${nodes.map(n=>n.type).join(', ') || 'None'}.
+Simulation running: ${simRunning}.
+Be concise, technical but beginner-friendly. Explain WHY things are wired certain ways. Mention specific pin numbers. Use ⚡ for tips, ⚠ for warnings.`;
+  const msgs = [];
+  document.querySelectorAll('.ai-msg').forEach(msg => {
+    const role = msg.querySelector('.ai-from')?.classList.contains('bot') ? 'assistant' : 'user';
+    const content = msg.querySelector('.ai-bubble')?.textContent?.trim();
+    if (content && !msg.querySelector('.ai-thinking')) msgs.push({role, content});
+  });
+  msgs.push({role:'user', content: txt});
+  try {
+    const res = await fetch(`${API_URL}/api/ai/chat`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({messages: [{role:'system', content: systemPrompt}, ...msgs.slice(-8)], maxTokens: 512}),
+    });
+    const data = await res.json();
+    thinking.remove();
+    appendAIMsg(data.reply || data.error || 'No response available.', 'bot');
+  } catch(err) {
+    thinking.remove();
+    appendAIMsg('⚠ Error connecting to the Nexus AI service.', 'bot');
+  }
+}
+
+function quickAsk(q) { document.getElementById('ai-input').value = q; sendAI(); }
+
+function appendAIMsg(text, role) {
+  const container = document.getElementById('ai-msgs');
+  const el = document.createElement('div');
+  el.className = `ai-msg ${role}`;
+  el.innerHTML = `<div class="ai-from ${role}">${role === 'bot' ? 'AI ASSISTANT' : 'YOU'}</div><div class="ai-bubble ${role}">${text.replace(/\n/g,'<br>')}</div>`;
+  container.appendChild(el);
+  container.scrollTop = container.scrollHeight;
+  return el;
+}
+
+function appendThinking() {
+  const container = document.getElementById('ai-msgs');
+  const el = document.createElement('div');
+  el.className = 'ai-msg';
+  el.innerHTML = `<div class="ai-from bot">AI ASSISTANT</div><div class="ai-bubble bot ai-thinking"><div class="ai-dot"></div><div class="ai-dot"></div><div class="ai-dot"></div></div>`;
+  container.appendChild(el);
+  container.scrollTop = container.scrollHeight;
+  return el;
+}
+
+// ─── CONSOLE ──────────────────────────────────────────────────────────────────
+let consoleLines = 0;
+function logConsole(msg, type='info') {
+  const out = document.getElementById('console-out');
+  const el = document.createElement('div');
+  const now = new Date();
+  const ts = `${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+  el.innerHTML = `<span class="log-time">[${ts}]</span><span class="log-${type}">${msg}</span>`;
+  out.appendChild(el);
+  consoleLines++;
+  if (consoleLines > 200) out.removeChild(out.firstChild);
+  out.scrollTop = out.scrollHeight;
+}
+function clearConsole() { document.getElementById('console-out').innerHTML = ''; consoleLines = 0; }
+
+// ─── UTILS ────────────────────────────────────────────────────────────────────
+function copyCode() {
+  navigator.clipboard.writeText(document.getElementById('code-editor').value)
+    .then(() => logConsole('Code copied to clipboard.','ok'));
+}
+
+function filterComponents(query) {
+  document.querySelectorAll('.comp-item').forEach(item => {
+    const name = item.querySelector('.comp-name')?.textContent.toLowerCase() || '';
+    const type = item.querySelector('.comp-type')?.textContent.toLowerCase() || '';
+    item.style.display = (!query || name.includes(query.toLowerCase()) || type.includes(query.toLowerCase())) ? '' : 'none';
+  });
+}
+
+function filterModules(difficulty, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.mod-card').forEach(card => {
+    const diff = card.dataset.difficulty;
+    card.style.display = (difficulty === 'all' || diff === difficulty) ? '' : 'none';
+  });
+}
+
+// ─── TAB SWITCHING ────────────────────────────────────────────────────────────
+function switchRTab(tab) {
+  rightTab = tab;
+  ['guide','code','ai'].forEach(t => {
+    document.getElementById(`rt-${t}`).classList.toggle('active', t === tab);
+  });
+  document.getElementById('guide-body').style.display = tab === 'guide' ? 'block' : 'none';
+  document.getElementById('code-body').style.display  = tab === 'code'  ? 'flex'  : 'none';
+  document.getElementById('ai-body').style.display    = tab === 'ai'    ? 'flex'  : 'none';
+}
+
+function switchMainTab(tab) {
+  mainTab = tab;
+  ['lab','modules'].forEach(t => document.getElementById(`tab-${t}`)?.classList.toggle('active', t===tab));
+  document.getElementById('modules-view').style.display = tab === 'modules' ? 'block' : 'none';
+  document.getElementById('main').style.display = tab === 'lab' ? 'flex' : 'none';
+  document.getElementById('tab-block').style.display = tab === 'lab' ? '' : 'none';
+}
+
+// ─── CLEAR ────────────────────────────────────────────────────────────────────
+function clearCanvas(silent) {
+  stopSim();
+  nodes = []; wires = []; nodeIdCounter = 0;
+  document.getElementById('nodes-layer').innerHTML = '';
+  document.getElementById('wire-svg').innerHTML = '';
+  if (!silent) {
+    currentModule = null; currentStep = 0;
+    document.getElementById('canvas-hint').style.display = 'flex';
+    document.getElementById('guide-body').innerHTML = '<div style="padding:14px;font-size:12px;color:var(--text2);">Select a module or load components to begin guided wiring.</div>';
+    document.getElementById('code-editor').value = '// Select a module to load code...';
+    clearConsole();
+    logConsole('Canvas cleared.','info');
+  }
+}
+
+// ─── BUILD MODULE LIST ────────────────────────────────────────────────────────
+function buildModuleList() {
+  const grid = document.getElementById('mod-grid');
+  grid.innerHTML = MODULES.map(mod => `
+  <div class="mod-card" id="modcard-${mod.id}" data-difficulty="${mod.difficulty}" onclick="loadModule('${mod.id}')">
+    <div class="mod-icon">${mod.icon}</div>
+    <div class="mod-title">${mod.title}</div>
+    <div class="mod-desc">${mod.desc}</div>
+    <div class="mod-stats">
+      <div class="mod-stat">⚙ ${mod.components.length} components</div>
+      <div class="mod-stat">🔌 ${mod.wires.length} wires</div>
+      <div class="mod-stat">📋 ${mod.steps.length} steps</div>
+    </div>
+    <div class="mod-tags">
+      <span class="mod-tag ${mod.difficulty==='Beginner'?'tag-beg':mod.difficulty==='Intermediate'?'tag-int':'tag-adv'}">${mod.difficulty}</span>
+      <span class="mod-tag" style="background:#f0f9ff;color:#0891b2;border:1px solid #bae6fd;">${mod.topic}</span>
+    </div>
+    <button class="mod-btn">Load Module →</button>
+  </div>`).join('');
+}
+
+window.addEventListener('resize', redrawWires);
+restoreSidebarStates();
+buildModuleList();
+setTimeout(() => loadModule('ultrasonic_distance'), 400);
+</script>
+</body>
+</html>
