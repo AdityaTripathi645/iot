@@ -400,6 +400,320 @@ function parseBlueprintJson(reply, boardType = "ESP32") {
   }
 }
 
+const STARTER_PROJECTS = [
+  {
+    id: "starter-distance-meter",
+    name: "Ultrasonic Distance Meter",
+    board: "Arduino Uno",
+    idea: "Measure distance with HC-SR04 and light an LED below 20 cm.",
+    data: {
+      project_name: "Ultrasonic Distance Meter",
+      summary:
+        "A beginner-friendly distance sensor that reports centimeters over Serial and triggers an LED alert.",
+      difficulty: "Beginner",
+      est_time: "45 minutes",
+      cost: "$12",
+      components: [
+        {
+          name: "HC-SR04",
+          qty: 1,
+          price: "$4",
+          purpose: "Ultrasonic distance sensing",
+          pin: "TRIG D9, ECHO D10",
+        },
+        {
+          name: "Arduino Uno",
+          qty: 1,
+          price: "$6",
+          purpose: "Reads the sensor and controls the alert",
+          pin: "USB",
+        },
+        {
+          name: "Red LED + 220 ohm resistor",
+          qty: 1,
+          price: "$2",
+          purpose: "Close-distance warning",
+          pin: "D13",
+        },
+      ],
+      wiring: [
+        {
+          from: "HC-SR04:VCC",
+          to: "Arduino:5V",
+          type: "Power",
+          note: "5V supply",
+        },
+        {
+          from: "HC-SR04:GND",
+          to: "Arduino:GND",
+          type: "Power",
+          note: "Common ground",
+        },
+        {
+          from: "HC-SR04:TRIG",
+          to: "Arduino:D9",
+          type: "Digital",
+          note: "Trigger pulse",
+        },
+        {
+          from: "HC-SR04:ECHO",
+          to: "Arduino:D10",
+          type: "Digital",
+          note: "Return pulse",
+        },
+        {
+          from: "LED:ANODE",
+          to: "Arduino:D13",
+          type: "Digital",
+          note: "Use 220 ohm resistor",
+        },
+      ],
+      libraries: [],
+      code: "#define TRIG_PIN 9\n#define ECHO_PIN 10\n#define LED_PIN 13\n\nvoid setup() {\n  Serial.begin(9600);\n  pinMode(TRIG_PIN, OUTPUT);\n  pinMode(ECHO_PIN, INPUT);\n  pinMode(LED_PIN, OUTPUT);\n}\n\nvoid loop() {\n  digitalWrite(TRIG_PIN, LOW); delayMicroseconds(2);\n  digitalWrite(TRIG_PIN, HIGH); delayMicroseconds(10);\n  digitalWrite(TRIG_PIN, LOW);\n  long duration = pulseIn(ECHO_PIN, HIGH, 30000);\n  float cm = duration * 0.0343 / 2.0;\n  digitalWrite(LED_PIN, cm > 0 && cm < 20);\n  Serial.println(cm);\n  delay(250);\n}",
+      safety: ["Keep the sensor and LED at the board's logic voltage."],
+      next_steps: ["Add an OLED display.", "Tune the alert distance."],
+    },
+  },
+  {
+    id: "starter-climate-monitor",
+    name: "Room Climate Monitor",
+    board: "ESP32",
+    idea: "Read DHT22 temperature and humidity and show values in Serial Monitor.",
+    data: {
+      project_name: "Room Climate Monitor",
+      summary:
+        "A compact ESP32 environmental monitor for temperature and humidity experiments.",
+      difficulty: "Beginner",
+      est_time: "1 hour",
+      cost: "$16",
+      components: [
+        {
+          name: "DHT22",
+          qty: 1,
+          price: "$6",
+          purpose: "Temperature and humidity",
+          pin: "DATA GPIO4",
+        },
+        {
+          name: "ESP32",
+          qty: 1,
+          price: "$10",
+          purpose: "WiFi-capable controller",
+          pin: "GPIO4",
+        },
+      ],
+      wiring: [
+        { from: "DHT22:VCC", to: "ESP32:3V3", type: "Power", note: "Use 3.3V" },
+        {
+          from: "DHT22:GND",
+          to: "ESP32:GND",
+          type: "Power",
+          note: "Common ground",
+        },
+        {
+          from: "DHT22:DATA",
+          to: "ESP32:GPIO4",
+          type: "Digital",
+          note: "Add a 10k pull-up",
+        },
+      ],
+      libraries: ["DHT sensor library"],
+      code: '#include <DHT.h>\n#define DHT_PIN 4\nDHT dht(DHT_PIN, DHT22);\n\nvoid setup() {\n  Serial.begin(115200);\n  dht.begin();\n}\n\nvoid loop() {\n  Serial.print("Temperature: " );\n  Serial.print(dht.readTemperature());\n  Serial.print(" C, Humidity: " );\n  Serial.println(dht.readHumidity());\n  delay(2000);\n}',
+      safety: ["Power the DHT22 from 3.3V when connected to ESP32."],
+      next_steps: ["Publish readings over MQTT.", "Add a web dashboard."],
+    },
+  },
+  {
+    id: "starter-smart-light",
+    name: "Automatic Plant Light",
+    board: "Arduino Uno",
+    idea: "Use an LDR to turn an LED on when the room gets dark.",
+    data: {
+      project_name: "Automatic Plant Light",
+      summary:
+        "An analog sensor project that maps ambient light to a simple LED control.",
+      difficulty: "Beginner",
+      est_time: "1 hour",
+      cost: "$10",
+      components: [
+        {
+          name: "LDR photoresistor",
+          qty: 1,
+          price: "$2",
+          purpose: "Measures ambient light",
+          pin: "A0 voltage divider",
+        },
+        {
+          name: "Green LED + resistor",
+          qty: 1,
+          price: "$2",
+          purpose: "Plant light indicator",
+          pin: "D9 PWM",
+        },
+        {
+          name: "Arduino Uno",
+          qty: 1,
+          price: "$6",
+          purpose: "Reads analog input",
+          pin: "A0, D9",
+        },
+      ],
+      wiring: [
+        {
+          from: "LDR:OUT",
+          to: "Arduino:A0",
+          type: "Analog",
+          note: "Use a 10k voltage divider",
+        },
+        {
+          from: "LED:ANODE",
+          to: "Arduino:D9",
+          type: "Digital",
+          note: "PWM brightness",
+        },
+        {
+          from: "LED:CATHODE",
+          to: "Arduino:GND",
+          type: "Power",
+          note: "Common ground",
+        },
+      ],
+      libraries: [],
+      code: "#define LDR_PIN A0\n#define LED_PIN 9\n\nvoid setup() {\n  Serial.begin(9600);\n  pinMode(LED_PIN, OUTPUT);\n}\n\nvoid loop() {\n  int light = analogRead(LDR_PIN);\n  int brightness = map(light, 0, 1023, 255, 0);\n  analogWrite(LED_PIN, constrain(brightness, 0, 255));\n  Serial.println(light);\n  delay(300);\n}",
+      safety: ["Always use a resistor in series with the LED."],
+      next_steps: [
+        "Calibrate the dark threshold.",
+        "Add a relay only after reviewing high-voltage safety.",
+      ],
+    },
+  },
+  {
+    id: "starter-motion-alarm",
+    name: "Motion Alarm",
+    board: "Arduino Uno",
+    idea: "Detect movement with a PIR sensor and activate a buzzer and LED.",
+    data: {
+      project_name: "Motion Alarm",
+      summary:
+        "A simple security learning project using a PIR sensor, buzzer, and visual alert.",
+      difficulty: "Beginner",
+      est_time: "1 hour",
+      cost: "$14",
+      components: [
+        {
+          name: "PIR HC-SR501",
+          qty: 1,
+          price: "$5",
+          purpose: "Motion detection",
+          pin: "OUT D2",
+        },
+        {
+          name: "Buzzer",
+          qty: 1,
+          price: "$3",
+          purpose: "Audio alert",
+          pin: "D8",
+        },
+        {
+          name: "Arduino Uno",
+          qty: 1,
+          price: "$6",
+          purpose: "Alarm controller",
+          pin: "D2, D8, D13",
+        },
+      ],
+      wiring: [
+        { from: "PIR:VCC", to: "Arduino:5V", type: "Power", note: "Supply" },
+        {
+          from: "PIR:OUT",
+          to: "Arduino:D2",
+          type: "Digital",
+          note: "Motion signal",
+        },
+        {
+          from: "Buzzer:+",
+          to: "Arduino:D8",
+          type: "Digital",
+          note: "Use a transistor for larger buzzers",
+        },
+      ],
+      libraries: [],
+      code: "#define PIR_PIN 2\n#define BUZZER_PIN 8\n#define LED_PIN 13\n\nvoid setup() {\n  pinMode(PIR_PIN, INPUT);\n  pinMode(BUZZER_PIN, OUTPUT);\n  pinMode(LED_PIN, OUTPUT);\n}\n\nvoid loop() {\n  bool motion = digitalRead(PIR_PIN);\n  digitalWrite(LED_PIN, motion);\n  if (motion) tone(BUZZER_PIN, 1200);\n  else noTone(BUZZER_PIN);\n  delay(100);\n}",
+      safety: ["Allow the PIR sensor to warm up before testing."],
+      next_steps: [
+        "Add an alarm timeout.",
+        "Log motion events to the collaboration session.",
+      ],
+    },
+  },
+  {
+    id: "starter-wifi-dashboard",
+    name: "ESP32 WiFi Dashboard",
+    board: "ESP32",
+    idea: "Serve a small browser page with live DHT22 readings over WiFi.",
+    data: {
+      project_name: "ESP32 WiFi Dashboard",
+      summary:
+        "A networked IoT starter that serves live sensor values from an ESP32 web server.",
+      difficulty: "Intermediate",
+      est_time: "2 hours",
+      cost: "$18",
+      components: [
+        {
+          name: "ESP32",
+          qty: 1,
+          price: "$10",
+          purpose: "WiFi microcontroller",
+          pin: "GPIO4",
+        },
+        {
+          name: "DHT22",
+          qty: 1,
+          price: "$6",
+          purpose: "Climate sensor",
+          pin: "DATA GPIO4",
+        },
+        {
+          name: "Breadboard and wires",
+          qty: 1,
+          price: "$2",
+          purpose: "Prototype wiring",
+          pin: "-",
+        },
+      ],
+      wiring: [
+        {
+          from: "DHT22:VCC",
+          to: "ESP32:3V3",
+          type: "Power",
+          note: "3.3V logic",
+        },
+        {
+          from: "DHT22:GND",
+          to: "ESP32:GND",
+          type: "Power",
+          note: "Common ground",
+        },
+        {
+          from: "DHT22:DATA",
+          to: "ESP32:GPIO4",
+          type: "Digital",
+          note: "10k pull-up recommended",
+        },
+      ],
+      libraries: ["WiFi", "WebServer", "DHT sensor library"],
+      code: '#include <WiFi.h>\n#include <WebServer.h>\nconst char* ssid = "YOUR_WIFI";\nconst char* password = "YOUR_PASSWORD";\nWebServer server(80);\n\nvoid setup() {\n  Serial.begin(115200);\n  WiFi.begin(ssid, password);\n  while (WiFi.status() != WL_CONNECTED) delay(250);\n  server.on("/", []() { server.send(200, "text/plain", "Nexus sensor online"); });\n  server.begin();\n}\n\nvoid loop() { server.handleClient(); }',
+      safety: [
+        "Replace WiFi placeholders locally and never commit credentials.",
+      ],
+      next_steps: [
+        "Add live DHT22 values to the response.",
+        "Protect the endpoint before using it outside your LAN.",
+      ],
+    },
+  },
+];
+
 // ─── MOCK USERS FOR COLLAB ────────────────────────────────────────────────────
 const MOCK_USERS = [
   { id: 1, name: "Arjun S.", avatar: "AS", color: "#ff3cac", status: "active" },
@@ -1502,6 +1816,17 @@ Return ONLY valid JSON. Keep the Arduino code concise, under 35 lines, so the co
     } catch {}
   };
 
+  const openStarterProject = (starter) => {
+    setProjectData(starter.data);
+    setPreviewCode(starter.data.code || "");
+    setProjectIdea(starter.idea);
+    setBoardType(starter.board);
+    setChatHistory([]);
+    setPage("builder");
+    setActiveTab("code");
+    showToast(`${starter.name} opened in Builder`, "success");
+  };
+
   if (authRestoring)
     return (
       <div
@@ -2361,6 +2686,100 @@ Return ONLY valid JSON. Keep the Arduino code concise, under 35 lines, so the co
                         </div>
                         <div style={{ fontSize: 10, color: "#2a4a64" }}>
                           {a.time}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Starter Projects */}
+                <div
+                  className="panel"
+                  style={{ padding: 20, gridColumn: "1/-1" }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "baseline",
+                      gap: 10,
+                      marginBottom: 6,
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontFamily: "'Rajdhani'",
+                        fontSize: 15,
+                        fontWeight: 700,
+                        color: "#2563eb",
+                        textTransform: "uppercase",
+                        letterSpacing: 1,
+                      }}
+                    >
+                      Starter Projects
+                    </div>
+                    <span style={{ fontSize: 11, color: "#64748b" }}>
+                      Run, inspect, and customize without AI generation
+                    </span>
+                  </div>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(auto-fit,minmax(210px,1fr))",
+                      gap: 10,
+                      marginTop: 14,
+                    }}
+                  >
+                    {STARTER_PROJECTS.map((starter) => (
+                      <div
+                        key={starter.id}
+                        className="module-card"
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 8,
+                        }}
+                      >
+                        <div
+                          style={{
+                            fontFamily: "'Rajdhani'",
+                            fontWeight: 700,
+                            color: "#0f172a",
+                            fontSize: 14,
+                          }}
+                        >
+                          {starter.name}
+                        </div>
+                        <div
+                          style={{
+                            fontSize: 11,
+                            color: "#64748b",
+                            lineHeight: 1.5,
+                            flex: 1,
+                          }}
+                        >
+                          {starter.idea}
+                        </div>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 6,
+                          }}
+                        >
+                          <span className="badge badge-cyan">
+                            {starter.board}
+                          </span>
+                          <button
+                            className="btn btn-primary"
+                            style={{
+                              marginLeft: "auto",
+                              padding: "7px 10px",
+                              fontSize: 10,
+                            }}
+                            onClick={() => openStarterProject(starter)}
+                          >
+                            Open in Builder
+                          </button>
                         </div>
                       </div>
                     ))}
